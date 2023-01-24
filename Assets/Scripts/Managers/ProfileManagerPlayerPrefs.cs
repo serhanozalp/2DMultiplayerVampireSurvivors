@@ -4,7 +4,7 @@ using Abstracts;
 
 public class ProfileManagerPlayerPrefs : BaseProfileManager
 {
-    protected override string RegexPattern => KeyDictionary.PROFILE_MANAGER_REGEX_PATTERN;
+    protected override string RegexPattern => ConstantDictionary.PROFILE_MANAGER_REGEX_PATTERN;
 
     public ProfileManagerPlayerPrefs() : base() { }
 
@@ -27,7 +27,7 @@ public class ProfileManagerPlayerPrefs : BaseProfileManager
     public override void DeleteProfile(string profileName)
     {
         _profileList.Remove(profileName);
-        if (profileName == _currentProfileName) CurrentProfileName = KeyDictionary.CLIENTPREFS_PROFILE_NAME_DEFAULT;
+        if (profileName == _currentProfileName) CurrentProfileName = ConstantDictionary.CLIENTPREFS_PROFILE_NAME_DEFAULT;
         SaveProfileList();
     }
 

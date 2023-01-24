@@ -8,8 +8,8 @@ public class MainMenuMediator : MonoBehaviour
 {
     [SerializeField]
     private BaseMainMenuCanvasGroup _canvasGroupStartGame, _canvasGroupProfiles, _canvasGroupLobbyList;
+    
     private BaseMainMenuCanvasGroup _currentCanvasGroup;
-
     private AuthenticationServiceFacade _authenticationServiceFacade;
     private BaseProfileManager _profileManager;
     private ApplicationManager _applicationManager;
@@ -81,11 +81,5 @@ public class MainMenuMediator : MonoBehaviour
     public void QuitGame()
     {
         _applicationManager.QuitApplication();
-    }
-
-    [ContextMenu("ShowPopup")]
-    private void ShowPopup()
-    {
-        PopupManager.Instance.AddPopup("", "");
     }
 }

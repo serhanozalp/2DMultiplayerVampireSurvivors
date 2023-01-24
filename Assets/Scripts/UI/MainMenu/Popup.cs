@@ -1,4 +1,5 @@
 using Abstracts;
+using Interfaces.Tweens;
 using UnityEngine;
 using TMPro;
 using DG.Tweening;
@@ -6,7 +7,7 @@ using UnityEngine.UI;
 using System;
 using System.Collections;
 
-public class Popup : BaseCanvasGroup, ITweenable
+public class Popup : BaseCanvasGroup, ITweenFade, ITweenPosition, ITweenScale
 {
     [SerializeField]
     private TMP_Text _textTitle, _textBody;
@@ -14,8 +15,6 @@ public class Popup : BaseCanvasGroup, ITweenable
     private Button _buttonClose;
 
     private Action<Popup> _onHiddenCallBack;
-    private Sequence _scaleSelfSequence;
-    private Sequence _fadeSelfSequence;
 
     protected override void Awake()
     {
@@ -24,9 +23,14 @@ public class Popup : BaseCanvasGroup, ITweenable
         StartCoroutine(HideCoroutine());
     }
 
+    private void ButtonCloseClicked()
+    {
+        Hide();
+    }
+
     private IEnumerator HideCoroutine()
     {
-        yield return new WaitForSecondsRealtime(KeyDictionary.POPUP_LIFE_DURATION);
+        yield return new WaitForSecondsRealtime(ConstantDictionary.PopupConstantDictionary.POPUP_LIFE_DURATION);
         Hide();
     }
 
@@ -39,41 +43,63 @@ public class Popup : BaseCanvasGroup, ITweenable
 
     public override void Hide()
     {
-        StartHideTween();
+        StartFadeTween(1f, 0f, new TweenWrapper
+        {
+            TweenDuration = ConstantDictionary.PopupConstantDictionary.POPUP_TWEEN_DURATION_FADE,
+            EaseType = ConstantDictionary.PopupConstantDictionary.POPUP_TWEEN_EASETYPE_FADE,
+            OnStartCallBack = () => Block(),
+            OnCompleteCallBack = () => { Unblock(); _onHiddenCallBack(this); }
+        }).Play();
     }
 
     public override void Show()
     {
-        StartShowTween();
+        StartScaleTween(Vector3.zero, Vector3.one, new TweenWrapper {
+            TweenDuration = ConstantDictionary.PopupConstantDictionary.POPUP_TWEEN_DURATION_SCALE,
+            EaseType = ConstantDictionary.PopupConstantDictionary.POPUP_TWEEN_EASETYPE_SCALE,
+            OnStartCallBack = () => Block(),
+            OnCompleteCallBack = () => Unblock()
+        }).Play();
     }
 
-    private void StartShowTween()
+    public Tween StartFadeTween(float startAlpha, float endAlpha, TweenWrapper tweenWrapper)
     {
-        _scaleSelfSequence = DOTween.Sequence();
-        _scaleSelfSequence.PrependCallback(() => Block());
-        _scaleSelfSequence.Join(_myRectTransform.DOScale(Vector3.one, KeyDictionary.POPUP_TWEEN_DURATION_SHOW).SetEase(Ease.InQuart));
-        _scaleSelfSequence.AppendCallback(() => Unblock());
-        _scaleSelfSequence.Play();
+        return _myCanvasGroup.DOFade(endAlpha, tweenWrapper.TweenDuration)
+            .From(startAlpha)
+            .SetEase(tweenWrapper.EaseType)
+            .OnStart(() => tweenWrapper.OnStartCallBack())
+            .OnComplete(() => tweenWrapper.OnCompleteCallBack())
+            .SetLink(this.gameObject, LinkBehaviour.KillOnDestroy);
     }
 
-    private void StartHideTween()
+    public Tween StartPositionTween(Vector3 startPosition, Vector3 endPosition, TweenWrapper tweenWrapper)
     {
-        _fadeSelfSequence = DOTween.Sequence();
-        _fadeSelfSequence.PrependCallback(() => Block());
-        _fadeSelfSequence.Join(_myCanvasGroup.DOFade(0f, KeyDictionary.POPUP_TWEEN_DURATION_HIDE));
-        _fadeSelfSequence.AppendCallback(() => { Unblock(); _onHiddenCallBack(this); });
-        _fadeSelfSequence.Play();
+        return _myRectTransform.DOAnchorPos(endPosition, tweenWrapper.TweenDuration)
+            .From(startPosition)
+            .SetEase(tweenWrapper.EaseType)
+            .OnStart(() => tweenWrapper.OnStartCallBack())
+            .OnComplete(() => tweenWrapper.OnCompleteCallBack())
+            .SetLink(this.gameObject, LinkBehaviour.KillOnDestroy);
     }
 
-    private void ButtonCloseClicked()
+    public Tween StartScaleTween(Vector3 startScale, Vector3 endScale, TweenWrapper tweenWrapper)
     {
-        Hide();
+        return _myRectTransform.DOScale(endScale, tweenWrapper.TweenDuration)
+            .From(startScale)
+            .SetEase(tweenWrapper.EaseType)
+            .OnStart(() => tweenWrapper.OnStartCallBack())
+            .OnComplete(() => tweenWrapper.OnCompleteCallBack())
+            .SetLink(this.gameObject, LinkBehaviour.KillOnDestroy);
+    }
+
+    public void KillAllTweens()
+    {
+        DOTween.Kill(this);
     }
 
     private void OnDestroy()
     {
-        _scaleSelfSequence?.Kill();
-        _fadeSelfSequence?.Kill();
+        KillAllTweens();
         StopAllCoroutines();
     }
 }

@@ -14,7 +14,7 @@ public class ApplicationManager : MonoBehaviour
     }
     private void Start()
     {
-        SceneManager.LoadSceneAsync(KeyDictionary.SCENE_NAME_MAINMENU);
+        SceneManager.LoadSceneAsync(ConstantDictionary.SCENE_NAME_MAINMENU);
     }
     public void QuitApplication()
     {

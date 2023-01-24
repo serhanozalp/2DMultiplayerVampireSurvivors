@@ -22,15 +22,15 @@ MonoBehaviour:
   maxSmoothUnscaledTime: 0.15
   rewindCallbackMode: 0
   showUnityEditorReport: 0
-  logBehaviour: 0
+  logBehaviour: 2
   drawGizmos: 0
   defaultRecyclable: 0
-  defaultAutoPlay: 2
+  defaultAutoPlay: 0
   defaultUpdateType: 0
   defaultTimeScaleIndependent: 0
-  defaultEaseType: 24
-  defaultEaseOvershootOrAmplitude: 0
-  defaultEasePeriod: 1
+  defaultEaseType: 0
+  defaultEaseOvershootOrAmplitude: 1
+  defaultEasePeriod: 1.5
   defaultAutoKill: 1
   defaultLoopType: 0
   debugMode: 0

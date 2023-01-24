@@ -1,15 +1,17 @@
 using UnityEngine;
 using DG.Tweening;
+using Interfaces.Tweens;
+using Extensions;
+using System;
 
 namespace Abstracts
 {
-    public abstract class BaseMainMenuCanvasGroup : BaseCanvasGroup, ITweenable
+    public abstract class BaseMainMenuCanvasGroup : BaseCanvasGroup, ITweenPosition
     {
         protected MainMenuMediator _mainMenuMediator;
 
-        private Vector3 _canvasGroupEnterPosition = new Vector3(1500f, 0f, 0f);
-        private Vector3 _canvasGroupExitPosition = new Vector3(-1500f, 0f, 0f);
-        private Sequence _moveSelfSequence;
+        private Vector2 _canvasGroupEnterPosition = new Vector3(1500f, 0f);
+        private Vector2 _canvasGroupExitPosition = new Vector3(-1500f, 0f);
 
         protected override void Awake()
         {
@@ -18,25 +20,43 @@ namespace Abstracts
         }
         public override void Hide()
         {
-            StartPositionTween(Vector3.zero, _canvasGroupExitPosition);
-        }
-        public override void Show()
-        {
-            StartPositionTween(_canvasGroupEnterPosition, Vector3.zero);
+            StartPositionTween(Vector3.zero, _canvasGroupExitPosition, new TweenWrapper
+            {
+                TweenDuration = ConstantDictionary.MAINMENU_TWEEN_DURATION_MOVE,
+                EaseType = ConstantDictionary.MAINMENU_TWEEN_EASETYPE_MOVE,
+                OnStartCallBack = () =>  Block(),
+                OnCompleteCallBack = () => Unblock()
+            }).Play();
         }
 
-        private void StartPositionTween(Vector3 startPosition, Vector3 endPosition)
+        public override void Show()
         {
-            _moveSelfSequence = DOTween.Sequence();
-            _moveSelfSequence.PrependCallback(() => { Block(); _myRectTransform.localPosition = startPosition; });
-            _moveSelfSequence.Join(_myRectTransform.DOAnchorPos(endPosition, KeyDictionary.MAINMENU_TWEEN_DURATION, true).SetEase(Ease.OutElastic));
-            _moveSelfSequence.AppendCallback(() => Unblock());
-            _moveSelfSequence.Play();
+            StartPositionTween(_canvasGroupEnterPosition, Vector3.zero, new TweenWrapper
+            {
+                TweenDuration = ConstantDictionary.MAINMENU_TWEEN_DURATION_MOVE,
+                EaseType = ConstantDictionary.MAINMENU_TWEEN_EASETYPE_MOVE,
+                OnStartCallBack = () => Block(),
+                OnCompleteCallBack = () => Unblock()
+            }).Play();
+        }
+
+        public Tween StartPositionTween(Vector3 startPosition, Vector3 endPosition, TweenWrapper tweenWrapper)
+        {
+            return _myRectTransform.DOAnchorPos(endPosition.ToVector2(), tweenWrapper.TweenDuration, true)
+                .From(startPosition.ToVector2())
+                .SetEase(tweenWrapper.EaseType)
+                .OnStart(() => tweenWrapper.OnStartCallBack())
+                .OnComplete(() => tweenWrapper.OnCompleteCallBack());
+        }
+
+        public void KillAllTweens()
+        {
+            DOTween.Kill(this);
         }
 
         protected virtual void OnDestroy()
         {
-            _moveSelfSequence?.Kill();
+            KillAllTweens();
         }
     }
 }
