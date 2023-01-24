@@ -3,7 +3,7 @@ using Unity.Services.Lobbies;
 public class LobbyServiceFacade
 {
     private const int k_maxPlayers = 4; 
-    public async void CreateLobbyAsync(string lobbyName)
+    public async void TryCreateLobbyAsync(string lobbyName)
     {
         try
         {

@@ -71,8 +71,15 @@ public class AuthenticationServiceFacade
         }
     }
 
-    public void SignOut()
+    public void TrySignOut()
     {
-        AuthenticationService.Instance.SignOut(true);
+        try
+        {
+            AuthenticationService.Instance.SignOut(true);
+        }
+        catch (Exception)
+        {
+            Debug.LogError("Error while trying to sign out from AuthenticationService!");
+        }
     }
 }

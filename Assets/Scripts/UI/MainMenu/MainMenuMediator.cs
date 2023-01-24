@@ -8,7 +8,9 @@ public class MainMenuMediator : MonoBehaviour
 {
     [SerializeField]
     private BaseMainMenuCanvasGroup _canvasGroupStartGame, _canvasGroupProfiles, _canvasGroupLobbyList;
-    
+    [SerializeField]
+    private GameObject _loadingSpinner;
+
     private BaseMainMenuCanvasGroup _currentCanvasGroup;
     private AuthenticationServiceFacade _authenticationServiceFacade;
     private BaseProfileManager _profileManager;
@@ -73,7 +75,7 @@ public class MainMenuMediator : MonoBehaviour
     #region Authentication
     public void SignOutFromUnityServices()
     {
-        _authenticationServiceFacade.SignOut();
+        _authenticationServiceFacade.TrySignOut();
         ShowCanvasGroupStartGame();
     }
     #endregion

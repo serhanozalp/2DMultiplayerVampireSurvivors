@@ -1,5 +1,5 @@
 using Abstracts;
-using Interfaces.Tweens;
+using Interfaces;
 using UnityEngine;
 using TMPro;
 using DG.Tweening;

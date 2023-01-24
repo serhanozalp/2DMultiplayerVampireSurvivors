@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using DG.Tweening;
 
-namespace Interfaces.Tweens
+namespace Interfaces
 {
     public struct TweenWrapper
     {

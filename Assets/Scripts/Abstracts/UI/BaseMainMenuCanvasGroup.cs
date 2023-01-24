@@ -1,8 +1,7 @@
 using UnityEngine;
 using DG.Tweening;
-using Interfaces.Tweens;
+using Interfaces;
 using Extensions;
-using System;
 
 namespace Abstracts
 {
@@ -18,6 +17,7 @@ namespace Abstracts
             base.Awake();
             _mainMenuMediator = GetComponentInParent<MainMenuMediator>();
         }
+
         public override void Hide()
         {
             StartPositionTween(Vector3.zero, _canvasGroupExitPosition, new TweenWrapper

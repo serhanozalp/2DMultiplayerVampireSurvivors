@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Abstracts;
 using DG.Tweening;
-using Interfaces.Tweens;
+using Interfaces;
 
 public class PopupManager : MonoBehaviourSingleton<PopupManager>
 {
