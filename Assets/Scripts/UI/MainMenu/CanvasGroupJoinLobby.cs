@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Unity.Services.Lobbies.Models;
 
 public class CanvasGroupJoinLobby : BaseCanvasGroup
 {
@@ -18,6 +19,8 @@ public class CanvasGroupJoinLobby : BaseCanvasGroup
     private Transform _dropDownContainer;
     [SerializeField]
     private LobbyListItemUI _prefabLobbyListItemUI;
+    [SerializeField]
+    private Toggle _toggleUseFilters;
 
     private List<Dropdown> _dropDownList;
 
@@ -47,8 +50,40 @@ public class CanvasGroupJoinLobby : BaseCanvasGroup
     private async void ButtonRefreshLobbiesClickedAsync()
     {
         Block();
-        await _mainMenuMediator.QuerryLobbiesAsync(new Dictionary<Type, string>());
+        Dictionary<Type, string> selectedGameModeNameDictionary = new Dictionary<Type, string>();
+        if (_toggleUseFilters.isOn)
+        {
+            foreach (var dropDown in _dropDownList)
+            {
+                selectedGameModeNameDictionary.Add(Type.GetType(dropDown.name), dropDown.options[dropDown.value].text);
+            }
+        }
+        var queriedLobbies = await _mainMenuMediator.QuerryLobbiesAsync(selectedGameModeNameDictionary);
+        SetupLobbyListUI(queriedLobbies);
         Unblock();
+    }
+
+    private void ClearLobbyListUI()
+    {
+        for (int i = 0; i < _lobbyListContainer.childCount; i++)
+        {
+            Destroy(_lobbyListContainer.GetChild(i).gameObject);
+        }
+    }
+
+    private void SetupLobbyListUI(List<Lobby> queriedLobbies)
+    {
+        ClearLobbyListUI();
+        foreach (var lobby in queriedLobbies ?? new List<Lobby>())
+        {
+            AddLobbyListItemUI();
+        }
+    }
+
+    private void AddLobbyListItemUI()
+    {
+        var lobbyListItemUI = Instantiate(_prefabLobbyListItemUI, _lobbyListContainer);
+        // Setup LobbyListItemUI
     }
 
     public override void Hide()

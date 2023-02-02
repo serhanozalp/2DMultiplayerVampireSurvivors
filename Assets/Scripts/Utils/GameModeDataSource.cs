@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Abstracts;
 using System;
+using System.Linq;
 
 public static class GameModeDataSource
 {
@@ -52,5 +53,10 @@ public static class GameModeDataSource
             }
             return _gameModeList;
         }
+    }
+
+    public static BaseGameMode GetGameModeByTypeAndModeName(Type type, string modeName)
+    {
+        return GameModeDictionary[type].First(x => x.ModeName == modeName);
     }
 }

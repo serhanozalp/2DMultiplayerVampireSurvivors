@@ -1,3 +1,5 @@
+using Unity.Services.Lobbies.Models;
+
 namespace Abstracts
 {
     public abstract class BaseCharacterSelectionGameMode : BaseGameMode
@@ -11,7 +13,8 @@ namespace Abstracts
 
         public abstract CharacterSelection CharacterSelectionType { get; }
 
-        public string ModeTypeName = "Character Selection Mode";
+        public override string ModeTypeName => "Character Selection Mode";
+        public override DataObject.IndexOptions DataObjectIndexOptions => DataObject.IndexOptions.S2;
 
         public override int CompareTo(BaseGameMode other)
         {

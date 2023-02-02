@@ -2,7 +2,6 @@ using UnityEngine;
 using Unity.Services.Core;
 using Unity.Services.Authentication;
 using System.Threading.Tasks;
-using System;
 using Abstracts;
 
 public class AuthenticationServiceFacade : BaseAuthenticationServiceFacade
@@ -19,6 +18,7 @@ public class AuthenticationServiceFacade : BaseAuthenticationServiceFacade
         try
         {
             await TryInitializeUnityServicesAsync();
+            if (_profileManager.CurrentProfileName != AuthenticationService.Instance.Profile) SwitchProfile(_profileManager.CurrentProfileName);
             if (AuthenticationService.Instance.IsAuthorized) return true;
             await TrySignInAsync();
             return true;
@@ -56,8 +56,6 @@ public class AuthenticationServiceFacade : BaseAuthenticationServiceFacade
     {
         try
         {
-            if (AuthenticationService.Instance.IsSignedIn) AuthenticationService.Instance.SignOut();
-            if (_profileManager.CurrentProfileName != AuthenticationService.Instance.Profile) AuthenticationService.Instance.SwitchProfile(_profileManager.CurrentProfileName);
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
             Debug.Log($"Signed in as { AuthenticationService.Instance.Profile }");
         }
@@ -69,5 +67,11 @@ public class AuthenticationServiceFacade : BaseAuthenticationServiceFacade
         {
             throw;
         }
+    }
+
+    private void SwitchProfile(string profileName)
+    {
+        if (AuthenticationService.Instance.IsSignedIn) AuthenticationService.Instance.SignOut();
+        AuthenticationService.Instance.SwitchProfile(profileName);
     }
 }

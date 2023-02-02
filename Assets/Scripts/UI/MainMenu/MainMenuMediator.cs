@@ -105,9 +105,9 @@ public class MainMenuMediator : MonoBehaviour
         _loadingSpinner.SetActive(true);
         if(await _authenticationServiceFacade.TryAuthorizePlayerAsync())
         {
-            var queryResult = await _lobbyServiceFacade.TryQuerryLobbiesAsync(selectedGameModeNameDictionary);
+            var queriedLobbies = await _lobbyServiceFacade.TryQuerryLobbiesAsync(selectedGameModeNameDictionary);
             _loadingSpinner.SetActive(false);
-            return queryResult;
+            return queriedLobbies;
         }
         else
         {

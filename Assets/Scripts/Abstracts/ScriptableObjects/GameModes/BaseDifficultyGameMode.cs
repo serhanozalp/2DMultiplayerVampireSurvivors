@@ -1,3 +1,5 @@
+using Unity.Services.Lobbies.Models;
+
 namespace Abstracts
 {
     public abstract class BaseDifficultyGameMode : BaseGameMode
@@ -9,7 +11,8 @@ namespace Abstracts
             Hard = 2
         }
 
-        public string ModeTypeName = "Difficulty Mode";
+        public override string ModeTypeName => "Difficulty Mode";
+        public override DataObject.IndexOptions DataObjectIndexOptions => DataObject.IndexOptions.S1; 
 
         public abstract Difficulty DifficultyType { get; }
 
