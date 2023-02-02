@@ -1,24 +1,27 @@
 using UnityEngine;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using Abstracts;
 using System;
+using Unity.Services.Lobbies.Models;
+using System.Threading.Tasks;
 
 public class MainMenuMediator : MonoBehaviour
 {
     [SerializeField]
-    private BaseMainMenuCanvasGroup _canvasGroupStartGame, _canvasGroupProfiles, _canvasGroupLobbyList;
+    private BaseMainMenuCanvasGroup _canvasGroupStartGame, _canvasGroupProfiles, _canvasGroupLobbyJoinCreate, _canvasGroupLobbyRoom;
     [SerializeField]
     private GameObject _loadingSpinner;
 
     private BaseMainMenuCanvasGroup _currentCanvasGroup;
-    private AuthenticationServiceFacade _authenticationServiceFacade;
+    private BaseAuthenticationServiceFacade _authenticationServiceFacade;
+    private BaseLobbyServiceFacade _lobbyServiceFacade;
     private BaseProfileManager _profileManager;
     private ApplicationManager _applicationManager;
 
     private void Awake()
     {
         _authenticationServiceFacade = ServiceLocator.Instance.GetService<AuthenticationServiceFacade>();
+        _lobbyServiceFacade = ServiceLocator.Instance.GetService<LobbyServiceFacade>();
         _profileManager = ServiceLocator.Instance.GetService<ProfileManagerPlayerPrefs>();
         _applicationManager = ServiceLocator.Instance.GetService<ApplicationManager>();
     }
@@ -41,12 +44,18 @@ public class MainMenuMediator : MonoBehaviour
         _currentCanvasGroup = _canvasGroupStartGame;
     }
 
-    public async Task ShowCanvasGroupLobbyListAsync()
+    public void ShowCanvasGroupLobbyJoinCreate()
     {
-        if (!await _authenticationServiceFacade.EnsurePlayerIsAuthorizedAsync()) return;
         _currentCanvasGroup?.Hide();
-        _canvasGroupLobbyList.Show();
-        _currentCanvasGroup = _canvasGroupLobbyList;
+        _canvasGroupLobbyJoinCreate.Show();
+        _currentCanvasGroup = _canvasGroupLobbyJoinCreate;
+    }
+
+    public void ShowCanvasGroupLobbyRoom()
+    {
+        _currentCanvasGroup?.Hide();
+        _canvasGroupLobbyRoom.Show();
+        _currentCanvasGroup = _canvasGroupStartGame;
     }
     #endregion
 
@@ -72,11 +81,39 @@ public class MainMenuMediator : MonoBehaviour
     }
     #endregion
 
-    #region Authentication
-    public void SignOutFromUnityServices()
+    #region LobbyService
+    public async Task CreateLobbyAsync(string lobbyName, Dictionary<Type, string> selectedGameModeNameDictionary)
     {
-        _authenticationServiceFacade.TrySignOut();
-        ShowCanvasGroupStartGame();
+        if (String.IsNullOrWhiteSpace(lobbyName))
+        {
+            PopupManager.Instance.AddPopup("Lobby Name Error", "Lobby Name Is Not Valid!");
+            return;
+        }
+        _loadingSpinner.SetActive(true);
+        if (await _authenticationServiceFacade.TryAuthorizePlayerAsync())
+        {
+            if (await _lobbyServiceFacade.TryCreateLobbyAsync(lobbyName, selectedGameModeNameDictionary))
+            {
+                ShowCanvasGroupLobbyRoom();
+            }
+        }
+        _loadingSpinner.SetActive(false);
+    }
+
+    public async Task<List<Lobby>> QuerryLobbiesAsync(Dictionary<Type, string> selectedGameModeNameDictionary)
+    {
+        _loadingSpinner.SetActive(true);
+        if(await _authenticationServiceFacade.TryAuthorizePlayerAsync())
+        {
+            var queryResult = await _lobbyServiceFacade.TryQuerryLobbiesAsync(selectedGameModeNameDictionary);
+            _loadingSpinner.SetActive(false);
+            return queryResult;
+        }
+        else
+        {
+            _loadingSpinner.SetActive(false);
+            return null;
+        }
     }
     #endregion
 

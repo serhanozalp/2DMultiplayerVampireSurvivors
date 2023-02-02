@@ -1,9 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Extensions;
 
-public static class ClientPrefs
+public static class PlayerPrefsRepository
 {
     public static void SaveProfileList(List<string> profileList)
     {

@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Abstracts;
 
-public class CanvasGroupLobbyList : BaseMainMenuCanvasGroup
+public class CanvasGroupLobbyJoinCreate : BaseMainMenuCanvasGroup
 {
     [SerializeField]
     private Button _buttonBack;
@@ -10,6 +10,6 @@ public class CanvasGroupLobbyList : BaseMainMenuCanvasGroup
     protected override void Awake()
     {
         base.Awake();
-        _buttonBack.onClick.AddListener(() => _mainMenuMediator.SignOutFromUnityServices());
+        _buttonBack.onClick.AddListener(() => _mainMenuMediator.ShowCanvasGroupStartGame());
     }
 }

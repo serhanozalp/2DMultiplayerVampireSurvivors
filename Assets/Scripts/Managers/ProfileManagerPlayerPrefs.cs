@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEngine;
 using Abstracts;
 
 public class ProfileManagerPlayerPrefs : BaseProfileManager
@@ -33,21 +32,21 @@ public class ProfileManagerPlayerPrefs : BaseProfileManager
 
     protected override string LoadCurrentProfileName()
     {
-        return ClientPrefs.LoadCurrentProfileName();
+        return PlayerPrefsRepository.LoadCurrentProfileName();
     }
 
     protected override List<string> LoadProfileList()
     {
-        return ClientPrefs.LoadProfileList();
+        return PlayerPrefsRepository.LoadProfileList();
     }
 
     protected override void SaveCurrentProfileName(string profileName)
     {
-        ClientPrefs.SaveCurrentProfileName(profileName);
+        PlayerPrefsRepository.SaveCurrentProfileName(profileName);
     }
 
     protected override void SaveProfileList()
     {
-        ClientPrefs.SaveProfileList(_profileList);
+        PlayerPrefsRepository.SaveProfileList(_profileList);
     }
 }

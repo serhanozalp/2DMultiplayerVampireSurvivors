@@ -6,6 +6,7 @@ public class ApplicationManager : MonoBehaviour
 {
     private void Awake()
     {
+        ServiceLocator.Instance.RegisterService(new LocalLobby());
         ServiceLocator.Instance.RegisterService(new ProfileManagerPlayerPrefs());
         ServiceLocator.Instance.RegisterService(new AuthenticationServiceFacade());
         ServiceLocator.Instance.RegisterService(new LobbyServiceFacade());

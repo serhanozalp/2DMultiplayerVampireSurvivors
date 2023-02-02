@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System;
 using Abstracts;
 
-public class AuthenticationServiceFacade
+public class AuthenticationServiceFacade : BaseAuthenticationServiceFacade
 {
     private BaseProfileManager _profileManager;
 
@@ -14,7 +14,7 @@ public class AuthenticationServiceFacade
         _profileManager = ServiceLocator.Instance.GetService<ProfileManagerPlayerPrefs>(true);
     }
 
-    public async Task<bool> EnsurePlayerIsAuthorizedAsync()
+    public override async Task<bool> TryAuthorizePlayerAsync()
     {
         try
         {
@@ -56,7 +56,7 @@ public class AuthenticationServiceFacade
     {
         try
         {
-            if (AuthenticationService.Instance.IsSignedIn) return;
+            if (AuthenticationService.Instance.IsSignedIn) AuthenticationService.Instance.SignOut();
             if (_profileManager.CurrentProfileName != AuthenticationService.Instance.Profile) AuthenticationService.Instance.SwitchProfile(_profileManager.CurrentProfileName);
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
             Debug.Log($"Signed in as { AuthenticationService.Instance.Profile }");
@@ -68,18 +68,6 @@ public class AuthenticationServiceFacade
         catch (RequestFailedException)
         {
             throw;
-        }
-    }
-
-    public void TrySignOut()
-    {
-        try
-        {
-            AuthenticationService.Instance.SignOut(true);
-        }
-        catch (Exception)
-        {
-            Debug.LogError("Error while trying to sign out from AuthenticationService!");
         }
     }
 }
