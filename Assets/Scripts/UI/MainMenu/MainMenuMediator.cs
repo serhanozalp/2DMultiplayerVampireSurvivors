@@ -13,17 +13,15 @@ public class MainMenuMediator : MonoBehaviour
     private GameObject _loadingSpinner;
 
     private BaseMainMenuCanvasGroup _currentCanvasGroup;
-    private BaseAuthenticationServiceFacade _authenticationServiceFacade;
-    private BaseLobbyServiceFacade _lobbyServiceFacade;
     private BaseProfileManager _profileManager;
     private ApplicationManager _applicationManager;
+    private ConnectionManager _connectionManager;
 
     private void Awake()
     {
-        _authenticationServiceFacade = ServiceLocator.Instance.GetService<AuthenticationServiceFacade>();
-        _lobbyServiceFacade = ServiceLocator.Instance.GetService<LobbyServiceFacade>();
         _profileManager = ServiceLocator.Instance.GetService<ProfileManagerPlayerPrefs>();
         _applicationManager = ServiceLocator.Instance.GetService<ApplicationManager>();
+        _connectionManager = ServiceLocator.Instance.GetService<ConnectionManager>();
     }
     private void Start()
     {
@@ -84,36 +82,20 @@ public class MainMenuMediator : MonoBehaviour
     #region LobbyService
     public async Task CreateLobbyAsync(string lobbyName, Dictionary<Type, string> selectedGameModeNameDictionary)
     {
-        if (String.IsNullOrWhiteSpace(lobbyName))
-        {
-            PopupManager.Instance.AddPopup("Lobby Name Error", "Lobby Name Is Not Valid!");
-            return;
-        }
         _loadingSpinner.SetActive(true);
-        if (await _authenticationServiceFacade.TryAuthorizePlayerAsync())
+        if(await _connectionManager.CreateLobbyAsync(lobbyName,selectedGameModeNameDictionary))
         {
-            if (await _lobbyServiceFacade.TryCreateLobbyAsync(lobbyName, selectedGameModeNameDictionary))
-            {
-                ShowCanvasGroupLobbyRoom();
-            }
+            ShowCanvasGroupLobbyRoom();
         }
         _loadingSpinner.SetActive(false);
     }
 
-    public async Task<List<Lobby>> QuerryLobbiesAsync(Dictionary<Type, string> selectedGameModeNameDictionary)
+    public async Task<List<Lobby>> QueryLobbiesAsync(Dictionary<Type, string> selectedGameModeNameDictionary)
     {
         _loadingSpinner.SetActive(true);
-        if(await _authenticationServiceFacade.TryAuthorizePlayerAsync())
-        {
-            var queriedLobbies = await _lobbyServiceFacade.TryQuerryLobbiesAsync(selectedGameModeNameDictionary);
-            _loadingSpinner.SetActive(false);
-            return queriedLobbies;
-        }
-        else
-        {
-            _loadingSpinner.SetActive(false);
-            return null;
-        }
+        var queriedLobbies = await _connectionManager.QueryLobbiesAsync(selectedGameModeNameDictionary);
+        _loadingSpinner.SetActive(false);
+        return queriedLobbies;
     }
     #endregion
 

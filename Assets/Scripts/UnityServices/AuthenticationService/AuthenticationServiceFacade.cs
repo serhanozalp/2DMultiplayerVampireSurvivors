@@ -6,7 +6,7 @@ using Abstracts;
 
 public class AuthenticationServiceFacade : BaseAuthenticationServiceFacade
 {
-    private BaseProfileManager _profileManager;
+    private readonly BaseProfileManager _profileManager;
 
     public AuthenticationServiceFacade()
     {
@@ -29,7 +29,7 @@ public class AuthenticationServiceFacade : BaseAuthenticationServiceFacade
             Debug.LogError("Error while trying to initialize UnityServices");
             return false;
         }
-        catch (RequestFailedException)
+        catch (AuthenticationException)
         {
             // POPUP
             Debug.LogError("Error while trying to sign in to AuthenticationService!");
@@ -63,7 +63,7 @@ public class AuthenticationServiceFacade : BaseAuthenticationServiceFacade
         {
             throw;
         }
-        catch (RequestFailedException)
+        catch (AuthenticationException)
         {
             throw;
         }

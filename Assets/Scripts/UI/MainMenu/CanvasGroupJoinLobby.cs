@@ -8,13 +8,13 @@ using Unity.Services.Lobbies.Models;
 public class CanvasGroupJoinLobby : BaseCanvasGroup
 {
     [SerializeField]
+    private CanvasGroupLobbyJoinCreate _canvasGroupLobbyJoinCreate;
+    [SerializeField]
     private Button _buttonResfreshLobbies;
     [SerializeField]
     private Transform _lobbyListContainer;
     [SerializeField]
     private Dropdown _prefabDropDown;
-    [SerializeField]
-    private MainMenuMediator _mainMenuMediator;
     [SerializeField]
     private Transform _dropDownContainer;
     [SerializeField]
@@ -49,7 +49,6 @@ public class CanvasGroupJoinLobby : BaseCanvasGroup
 
     private async void ButtonRefreshLobbiesClickedAsync()
     {
-        Block();
         Dictionary<Type, string> selectedGameModeNameDictionary = new Dictionary<Type, string>();
         if (_toggleUseFilters.isOn)
         {
@@ -58,9 +57,8 @@ public class CanvasGroupJoinLobby : BaseCanvasGroup
                 selectedGameModeNameDictionary.Add(Type.GetType(dropDown.name), dropDown.options[dropDown.value].text);
             }
         }
-        var queriedLobbies = await _mainMenuMediator.QuerryLobbiesAsync(selectedGameModeNameDictionary);
+        var queriedLobbies = await _canvasGroupLobbyJoinCreate.QueryLobbiesAsync(selectedGameModeNameDictionary);
         SetupLobbyListUI(queriedLobbies);
-        Unblock();
     }
 
     private void ClearLobbyListUI()
@@ -76,11 +74,11 @@ public class CanvasGroupJoinLobby : BaseCanvasGroup
         ClearLobbyListUI();
         foreach (var lobby in queriedLobbies ?? new List<Lobby>())
         {
-            AddLobbyListItemUI();
+            AddLobbyListItemUI(lobby);
         }
     }
 
-    private void AddLobbyListItemUI()
+    private void AddLobbyListItemUI(Lobby lobby)
     {
         var lobbyListItemUI = Instantiate(_prefabLobbyListItemUI, _lobbyListContainer);
         // Setup LobbyListItemUI

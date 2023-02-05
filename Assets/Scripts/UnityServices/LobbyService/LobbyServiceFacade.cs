@@ -10,7 +10,6 @@ using Extensions;
 public class LobbyServiceFacade : BaseLobbyServiceFacade
 {
     private readonly LocalLobby _localLobby;
-    private const int k_maxPlayers = 4;
 
     public LobbyServiceFacade()
     {
@@ -21,7 +20,7 @@ public class LobbyServiceFacade : BaseLobbyServiceFacade
     {
         try
         {
-            var lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, k_maxPlayers, GenerateCreateLobbyOptions(selectedGameModeNameDictionary));
+            var lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, ConstantDictionary.GAMEPLAY_MAX_PLAYERS, GenerateCreateLobbyOptions(selectedGameModeNameDictionary));
             _localLobby.ApplyLobbyData(lobby);
             return true;
         }
@@ -45,6 +44,8 @@ public class LobbyServiceFacade : BaseLobbyServiceFacade
                 pair.Value,
                 GameModeDataSource.GetGameModeByTypeAndModeName(type, pair.Value).DataObjectIndexOptions));
         }
+        createLobbyOptions.Data.Add(ConstantDictionary.KEY_LOBBY_OPTIONS_RELAYCODE, new DataObject(
+            DataObject.VisibilityOptions.Public, _localLobby.RelayCode ?? ""));
         return createLobbyOptions;
     }
 
@@ -52,8 +53,8 @@ public class LobbyServiceFacade : BaseLobbyServiceFacade
     {
         try
         {
-            var queryResponse = await LobbyService.Instance.QueryLobbiesAsync(GenerateQueryLobbiesOptions(selectedGameModeNameDictionary));
-            return queryResponse.Results;
+            var queriedLobbies = await LobbyService.Instance.QueryLobbiesAsync(GenerateQueryLobbiesOptions(selectedGameModeNameDictionary));
+            return queriedLobbies.Results;
         }
         catch (LobbyServiceException)
         {

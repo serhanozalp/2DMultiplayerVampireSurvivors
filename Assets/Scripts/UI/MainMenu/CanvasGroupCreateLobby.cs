@@ -8,6 +8,8 @@ using System;
 public class CanvasGroupCreateLobby : BaseCanvasGroup
 {
     [SerializeField]
+    private CanvasGroupLobbyJoinCreate _canvasGroupLobbyJoinCreate;
+    [SerializeField]
     private Dropdown _prefabDropDown;
     [SerializeField]
     private Transform _dropDownContainer;
@@ -15,8 +17,6 @@ public class CanvasGroupCreateLobby : BaseCanvasGroup
     private Button _buttonCreateLobby;
     [SerializeField]
     private TMP_InputField _inputFieldLobbyName;
-    [SerializeField]
-    private MainMenuMediator _mainMenuMediator;
 
     private List<Dropdown> _dropDownList;
 
@@ -24,7 +24,7 @@ public class CanvasGroupCreateLobby : BaseCanvasGroup
     {
         base.Awake();
         _dropDownList = new List<Dropdown>();
-        _buttonCreateLobby.onClick.AddListener(ButtonCreateLobbyClickedAsync);
+        _buttonCreateLobby.onClick.AddListener(ButtonCreateLobbyClicked);
     }
 
     private void Start()
@@ -32,16 +32,19 @@ public class CanvasGroupCreateLobby : BaseCanvasGroup
         SetupGameModeDropDowns();
     }
 
-    private async void ButtonCreateLobbyClickedAsync()
+    private void ButtonCreateLobbyClicked()
     {
+        if (!IsLobbyNameValid(_inputFieldLobbyName.text))
+        {
+            PopupManager.Instance.AddPopup("Lobby Name Error", "Lobby Name Is Not Valid!");
+            return;
+        }
         Dictionary<Type, string> selectedGameModeNameDictionary = new Dictionary<Type, string>();
         foreach(var dropDown in _dropDownList)
         {
             selectedGameModeNameDictionary.Add(Type.GetType(dropDown.name), dropDown.options[dropDown.value].text);
         }
-        Block();
-        await _mainMenuMediator.CreateLobbyAsync(_inputFieldLobbyName.text, selectedGameModeNameDictionary);
-        Unblock();
+        _canvasGroupLobbyJoinCreate.CreateLobbyAsync(_inputFieldLobbyName.text, selectedGameModeNameDictionary);
     }
 
     private void SetupGameModeDropDowns()
@@ -53,6 +56,11 @@ public class CanvasGroupCreateLobby : BaseCanvasGroup
             dropDown.AddOptions(pair.Value);
             _dropDownList.Add(dropDown);
         }
+    }
+
+    private bool IsLobbyNameValid(string lobbyName)
+    {
+        return String.IsNullOrWhiteSpace(lobbyName) ? false : true;
     }
 
     public override void Hide()

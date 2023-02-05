@@ -8,8 +8,11 @@ public class ApplicationManager : MonoBehaviour
     {
         ServiceLocator.Instance.RegisterService(new LocalLobby());
         ServiceLocator.Instance.RegisterService(new ProfileManagerPlayerPrefs());
+        ServiceLocator.Instance.RegisterService(new RelayServiceFacade());
         ServiceLocator.Instance.RegisterService(new AuthenticationServiceFacade());
         ServiceLocator.Instance.RegisterService(new LobbyServiceFacade());
+        ServiceLocator.Instance.RegisterService(new NetworkConnectionStateMachine());
+        ServiceLocator.Instance.RegisterService(new ConnectionManager());
 
         DontDestroyOnLoad(this);
     }

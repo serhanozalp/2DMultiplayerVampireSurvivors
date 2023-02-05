@@ -766,6 +766,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19aa0c6fdfcd0c94999dc54860d497db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _canvasGroupLobbyJoinCreate: {fileID: 257771486}
   _prefabDropDown: {fileID: 2974329506121693803, guid: aea4894df51f7334388940948cc3b843, type: 3}
   _dropDownContainer: {fileID: 117448234}
   _buttonCreateLobby: {fileID: 956101665}
@@ -4456,6 +4457,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bca8788fe5d483e44b8d050080b636f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _canvasGroupLobbyJoinCreate: {fileID: 257771486}
   _buttonResfreshLobbies: {fileID: 923975748}
   _lobbyListContainer: {fileID: 445959897}
   _prefabDropDown: {fileID: 2974329506121693803, guid: aea4894df51f7334388940948cc3b843, type: 3}
