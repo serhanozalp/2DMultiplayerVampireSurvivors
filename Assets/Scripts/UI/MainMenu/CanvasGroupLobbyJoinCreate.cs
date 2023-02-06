@@ -31,4 +31,11 @@ public class CanvasGroupLobbyJoinCreate : BaseMainMenuCanvasGroup
         await _mainMenuMediator.CreateLobbyAsync(lobbyName, selectedGameModeNameDictionary);
         Unblock();
     }
+
+    public async void JoinLobbyAsync(Lobby lobby)
+    {
+        Block();
+        await _mainMenuMediator.JoinLobbyAsync(lobby);
+        Unblock();
+    }
 }

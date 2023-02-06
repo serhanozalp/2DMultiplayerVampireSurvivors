@@ -16,10 +16,31 @@ public class LobbyServiceFacade : BaseLobbyServiceFacade
         _localLobby = ServiceLocator.Instance.GetService<LocalLobby>(true);
     }
 
+    public override async Task<bool> TryJoinLobbyByIdAsync(string lobbyId)
+    {
+        try
+        {
+            var lobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId);
+            _localLobby.ApplyLobbyData(lobby);
+            return true;
+        }
+        catch (LobbyServiceException)
+        {
+            // POPUP
+            Debug.LogError("Error while joining lobby!");
+            return false;
+        }
+    }
+
     public override async Task<bool> TryCreateLobbyAsync(string lobbyName, Dictionary<Type,string> selectedGameModeNameDictionary)
     {
         try
         {
+            if (!IsLobbyNameValid(lobbyName))
+            {
+                PopupManager.Instance.AddPopup("Lobby Name Error", "Lobby Name Is Not Valid!");
+                return false;
+            }
             var lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, ConstantDictionary.GAMEPLAY_MAX_PLAYERS, GenerateCreateLobbyOptions(selectedGameModeNameDictionary));
             _localLobby.ApplyLobbyData(lobby);
             return true;
@@ -49,7 +70,7 @@ public class LobbyServiceFacade : BaseLobbyServiceFacade
         return createLobbyOptions;
     }
 
-    public override async Task<List<Lobby>> TryQuerryLobbiesAsync(Dictionary<Type, string> selectedGameModeNameDictionary)
+    public override async Task<List<Lobby>> TryQueryLobbiesAsync(Dictionary<Type, string> selectedGameModeNameDictionary)
     {
         try
         {

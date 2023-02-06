@@ -33,4 +33,20 @@ public class RelayServiceFacade : BaseRelayServiceFacade
             return false;
         }
     }
+
+    public override async Task<bool> TryJoinAllocationAsync(string relayCode)
+    {
+        try
+        {
+            JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(relayCode);
+            _networkManager.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation, ConstantDictionary.RELAYSERVICE_CONNECTION_TYPE));
+            return true;
+        }
+        catch (RelayServiceException)
+        {
+            // POPUP
+            Debug.LogError("Error while joining relay allocation!");
+            return false;
+        }
+    }
 }

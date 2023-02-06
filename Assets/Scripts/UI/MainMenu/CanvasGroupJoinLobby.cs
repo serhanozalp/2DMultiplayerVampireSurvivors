@@ -81,7 +81,12 @@ public class CanvasGroupJoinLobby : BaseCanvasGroup
     private void AddLobbyListItemUI(Lobby lobby)
     {
         var lobbyListItemUI = Instantiate(_prefabLobbyListItemUI, _lobbyListContainer);
-        // Setup LobbyListItemUI
+        lobbyListItemUI.Setup(lobby, JoinLobby);
+    }
+
+    private void JoinLobby(LobbyListItemUI sender)
+    {
+        _canvasGroupLobbyJoinCreate.JoinLobbyAsync(sender.Lobby);
     }
 
     public override void Hide()

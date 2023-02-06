@@ -34,11 +34,6 @@ public class CanvasGroupCreateLobby : BaseCanvasGroup
 
     private void ButtonCreateLobbyClicked()
     {
-        if (!IsLobbyNameValid(_inputFieldLobbyName.text))
-        {
-            PopupManager.Instance.AddPopup("Lobby Name Error", "Lobby Name Is Not Valid!");
-            return;
-        }
         Dictionary<Type, string> selectedGameModeNameDictionary = new Dictionary<Type, string>();
         foreach(var dropDown in _dropDownList)
         {
@@ -56,11 +51,6 @@ public class CanvasGroupCreateLobby : BaseCanvasGroup
             dropDown.AddOptions(pair.Value);
             _dropDownList.Add(dropDown);
         }
-    }
-
-    private bool IsLobbyNameValid(string lobbyName)
-    {
-        return String.IsNullOrWhiteSpace(lobbyName) ? false : true;
     }
 
     public override void Hide()

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Abstracts;
 
@@ -32,7 +33,11 @@ public class ProfileManagerPlayerPrefs : BaseProfileManager
 
     protected override string LoadCurrentProfileName()
     {
+#if UNITY_EDITOR
+        return Guid.NewGuid().ToString().Substring(0,30);
+#else
         return PlayerPrefsRepository.LoadCurrentProfileName();
+#endif
     }
 
     protected override List<string> LoadProfileList()

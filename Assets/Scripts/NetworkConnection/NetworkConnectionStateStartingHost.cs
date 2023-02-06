@@ -28,6 +28,13 @@ public class NetworkConnectionStateStartingHost : BaseNetworkConnectionStateOnli
         }
     }
 
+    private void StartingHostFailed()
+    {
+        // POPUP
+        Debug.LogError("Error while starting host!");
+        _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateOffline);
+    }
+
     private void NetworkManager_OnServerStarted()
     {
         _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateHosting);
@@ -36,12 +43,5 @@ public class NetworkConnectionStateStartingHost : BaseNetworkConnectionStateOnli
     public override void OnClientDisconnect(ulong clientId)
     {
         if(clientId == _networkManager.LocalClientId) StartingHostFailed();
-    }
-
-    private void StartingHostFailed()
-    {
-        // POPUP
-        Debug.LogError("Error while starting host!");
-        _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateOffline);
     }
 }

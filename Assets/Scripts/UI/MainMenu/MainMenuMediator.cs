@@ -97,6 +97,16 @@ public class MainMenuMediator : MonoBehaviour
         _loadingSpinner.SetActive(false);
         return queriedLobbies;
     }
+
+    public async Task JoinLobbyAsync(Lobby lobby)
+    {
+        _loadingSpinner.SetActive(true);
+        if(await _connectionManager.JoinLobbyAsync(lobby))
+        {
+            ShowCanvasGroupLobbyRoom();
+        }
+        _loadingSpinner.SetActive(false);
+    }
     #endregion
 
     public void QuitGame()
