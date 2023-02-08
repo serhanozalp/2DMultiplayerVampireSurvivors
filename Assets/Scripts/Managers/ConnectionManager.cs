@@ -27,15 +27,14 @@ public class ConnectionManager
         if (!await _authenticationServiceFacade.TryAuthorizePlayerAsync()) return false;
         if (!await _relayServiceFacade.TryJoinAllocationAsync(lobby.Data[ConstantDictionary.KEY_LOBBY_OPTIONS_RELAYCODE].Value)) return false;
         _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateStartingClient);
-        if (!await AsyncTaskUtils.WaitUntil(() => { return _networkManager.IsConnectedClient; }, 25, 7000))
+        if (!await AsyncTaskUtils.WaitUntil(() => { return _networkManager.IsConnectedClient; }, ConstantDictionary.NETWORK_ISCONNECTED_CHECK_INTERVAL, ConstantDictionary.NETWORK_ISCONNECTED_WAIT_TIME))
         {
-            _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateOffline);
+            _networkConnectionStateMachine.RequestShutdown();
             return false;
         }
-        //if (!_networkManager.IsConnectedClient) return false;
         if (!await _lobbyServiceFacade.TryJoinLobbyByIdAsync(lobby.Id))
         {
-            _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateOffline);
+            _networkConnectionStateMachine.RequestShutdown();
             return false;
         }
         
@@ -50,7 +49,7 @@ public class ConnectionManager
         if (!_networkManager.IsListening) return false;
         if (!await _lobbyServiceFacade.TryCreateLobbyAsync(lobbyName, selectedGameModeNameDictionary))
         {
-            _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateOffline);
+            _networkConnectionStateMachine.RequestShutdown();
             return false;
         }
         return true;

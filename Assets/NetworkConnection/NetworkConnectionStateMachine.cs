@@ -30,4 +30,9 @@ public class NetworkConnectionStateMachine
         _currentNetworkConnectionState = networkConnectionState;
         networkConnectionState.Enter();
     }
+
+    public void RequestShutdown()
+    {
+        _currentNetworkConnectionState.OnRequestShutdown();
+    }
 }

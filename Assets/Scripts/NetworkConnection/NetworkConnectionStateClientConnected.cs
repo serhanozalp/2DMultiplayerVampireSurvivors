@@ -4,7 +4,6 @@ public class NetworkConnectionStateClientConnected : BaseNetworkConnectionStateO
 {
     public NetworkConnectionStateClientConnected(NetworkConnectionStateMachine networkConnectionStateMachine) : base(networkConnectionStateMachine)
     {
-
     }
 
     public override void Enter()
@@ -15,9 +14,5 @@ public class NetworkConnectionStateClientConnected : BaseNetworkConnectionStateO
     public override void Exit()
     {
         base.Exit();
-    }
-
-    public override void OnClientDisconnect(ulong clientId)
-    {
     }
 }

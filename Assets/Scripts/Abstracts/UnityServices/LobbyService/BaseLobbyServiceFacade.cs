@@ -13,6 +13,10 @@ namespace Abstracts
 
         public abstract Task<bool> TryJoinLobbyByIdAsync(string lobbyId);
 
+        public abstract void TrySendHeartBeatPingAsync(string lobbyId);
+
+        public abstract void TryGetLobbyAsync(string lobbyId);
+
         protected bool IsLobbyNameValid(string lobbyName)
         {
             return String.IsNullOrWhiteSpace(lobbyName) ? false : true;

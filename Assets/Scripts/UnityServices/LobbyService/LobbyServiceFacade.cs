@@ -10,10 +10,39 @@ using Extensions;
 public class LobbyServiceFacade : BaseLobbyServiceFacade
 {
     private readonly LocalLobby _localLobby;
+    private readonly LobbyPoller _lobbyPoller;
 
     public LobbyServiceFacade()
     {
         _localLobby = ServiceLocator.Instance.GetService<LocalLobby>(true);
+        _lobbyPoller = new LobbyPoller(this, _localLobby);
+    }
+
+    public override async void TrySendHeartBeatPingAsync(string lobbyId)
+    {
+        try
+        {
+            await LobbyService.Instance.SendHeartbeatPingAsync(lobbyId);
+        }
+        catch (LobbyServiceException)
+        {
+            // POPUP
+            Debug.LogError("Error while sending heartbeat to the lobby!");
+        }
+    }
+
+    public override async void TryGetLobbyAsync(string lobbyId)
+    {
+        try
+        {
+            var lobby = await LobbyService.Instance.GetLobbyAsync(lobbyId);
+            _localLobby.SetLobbyData(lobby);
+        }
+        catch (LobbyServiceException)
+        {
+            // POPUP
+            Debug.LogError("Error while getting the lobby!");
+        }
     }
 
     public override async Task<bool> TryJoinLobbyByIdAsync(string lobbyId)
@@ -21,7 +50,8 @@ public class LobbyServiceFacade : BaseLobbyServiceFacade
         try
         {
             var lobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId);
-            _localLobby.ApplyLobbyData(lobby);
+            _localLobby.SetLobbyData(lobby);
+            _lobbyPoller.StartPolling();
             return true;
         }
         catch (LobbyServiceException)
@@ -42,7 +72,8 @@ public class LobbyServiceFacade : BaseLobbyServiceFacade
                 return false;
             }
             var lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, ConstantDictionary.GAMEPLAY_MAX_PLAYERS, GenerateCreateLobbyOptions(selectedGameModeNameDictionary));
-            _localLobby.ApplyLobbyData(lobby);
+            _localLobby.SetLobbyData(lobby);
+            _lobbyPoller.StartPolling();
             return true;
         }
         catch (LobbyServiceException)

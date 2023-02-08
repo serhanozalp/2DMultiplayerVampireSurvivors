@@ -25,24 +25,14 @@ public class NetworkConnectionStateStartingClient : BaseNetworkConnectionStateOn
     {
         if (!_networkManager.StartClient())
         {
-            StartingClientFailed();
+            // POPUP
+            Debug.LogError("Error while starting client!");
+            _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateOffline);
         }
-    }
-
-    private void StartingClientFailed()
-    {
-        // POPUP
-        Debug.LogError("Error while starting client!");
-        _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateOffline);
     }
 
     private void NetworkManager_OnClientConnectedCallback(ulong clientId)
     {
         _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateClientConnected);
-    }
-
-    public override void OnClientDisconnect(ulong clientId)
-    {
-        StartingClientFailed();
     }
 }

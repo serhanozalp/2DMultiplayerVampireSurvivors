@@ -18,6 +18,6 @@ public class NetworkConnectionStateHosting : BaseNetworkConnectionStateOnline
 
     public override void OnClientDisconnect(ulong clientId)
     {
-        if (clientId == _networkManager.LocalClientId) _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateOffline);
+        if (clientId == _networkManager.LocalClientId) base.OnClientDisconnect(clientId);
     }
 }
