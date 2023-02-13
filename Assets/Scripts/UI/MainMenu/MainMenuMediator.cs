@@ -53,7 +53,7 @@ public class MainMenuMediator : MonoBehaviour
     {
         _currentCanvasGroup?.Hide();
         _canvasGroupLobbyRoom.Show();
-        _currentCanvasGroup = _canvasGroupStartGame;
+        _currentCanvasGroup = _canvasGroupLobbyRoom;
     }
     #endregion
 
@@ -83,10 +83,7 @@ public class MainMenuMediator : MonoBehaviour
     public async Task CreateLobbyAsync(string lobbyName, Dictionary<Type, string> selectedGameModeNameDictionary)
     {
         _loadingSpinner.SetActive(true);
-        if(await _connectionManager.CreateLobbyAsync(lobbyName,selectedGameModeNameDictionary))
-        {
-            ShowCanvasGroupLobbyRoom();
-        }
+        if(await _connectionManager.CreateLobbyAsync(lobbyName,selectedGameModeNameDictionary)) ShowCanvasGroupLobbyRoom();
         _loadingSpinner.SetActive(false);
     }
 
@@ -101,10 +98,14 @@ public class MainMenuMediator : MonoBehaviour
     public async Task JoinLobbyAsync(Lobby lobby)
     {
         _loadingSpinner.SetActive(true);
-        if(await _connectionManager.JoinLobbyAsync(lobby))
-        {
-            ShowCanvasGroupLobbyRoom();
-        }
+        if(await _connectionManager.JoinLobbyAsync(lobby)) ShowCanvasGroupLobbyRoom();
+        _loadingSpinner.SetActive(false);
+    }
+
+    public async Task QuitLobbyAsync()
+    {
+        _loadingSpinner.SetActive(true);
+        if (await _connectionManager.QuitLobbyAsync()) ShowCanvasGroupLobbyJoinCreate();
         _loadingSpinner.SetActive(false);
     }
     #endregion

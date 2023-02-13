@@ -11,8 +11,8 @@ public class PopupManager : MonoBehaviourSingleton<PopupManager>
 
     private struct PopupCommand
     {
-        public string PopupTitle;
-        public string PopupBody;
+        public string popupTitle;
+        public string popupBody;
     }
 
     private float _popupHeight;
@@ -28,7 +28,7 @@ public class PopupManager : MonoBehaviourSingleton<PopupManager>
     public void AddPopup(string title, string body)
     {
         if (_popupCommandQueue.Count + _popupList.Count >= ConstantDictionary.PopupConstantDictionary.POPUPMANAGER_MAX_POPUP_ADD) return;
-        _popupCommandQueue.Enqueue(new PopupCommand { PopupTitle = title, PopupBody = body });
+        _popupCommandQueue.Enqueue(new PopupCommand { popupTitle = title, popupBody = body });
         ShowAvailablePopups();
     }
 
@@ -47,7 +47,7 @@ public class PopupManager : MonoBehaviourSingleton<PopupManager>
         {
             PopupCommand popupCommand = _popupCommandQueue.Dequeue();
             Popup popup = Instantiate(_prefabPopup, transform);
-            popup.Setup(popupCommand.PopupTitle, popupCommand.PopupBody, DestroyPopup);
+            popup.Setup(popupCommand.popupTitle, popupCommand.popupBody, DestroyPopup);
             _popupList.Add(popup);
             popup.GetComponent<RectTransform>().anchoredPosition = GetPopupActualPositionByIndex(popup);
             popup.Show();
@@ -61,8 +61,8 @@ public class PopupManager : MonoBehaviourSingleton<PopupManager>
             var popup = _popupList.ToArray()[i];
             popup.StartPositionTween(popup.GetComponent<RectTransform>().anchoredPosition, GetPopupActualPositionByIndex(popup), new TweenWrapper
             {
-                TweenDuration = ConstantDictionary.PopupConstantDictionary.POPUP_TWEEN_DURATION_MOVE,
-                EaseType = ConstantDictionary.PopupConstantDictionary.POPUP_TWEEN_EASETYPE_MOVE,
+                tweenDuration = ConstantDictionary.PopupConstantDictionary.POPUP_TWEEN_DURATION_MOVE,
+                easeType = ConstantDictionary.PopupConstantDictionary.POPUP_TWEEN_EASETYPE_MOVE,
                 OnStartCallBack = () => { },
                 OnCompleteCallBack = () => { }
             }).Play();

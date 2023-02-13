@@ -1,6 +1,12 @@
 using Abstracts;
 using UnityEngine;
 
+public struct ConnectionPayload
+{
+    public string unityServiceId;
+    public string playerName;
+}
+
 public class NetworkConnectionStateMachine
 {
     public readonly BaseNetworkConnectionState _networkConnectionStateOffline;

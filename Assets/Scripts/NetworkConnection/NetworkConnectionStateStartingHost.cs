@@ -1,27 +1,32 @@
 using Abstracts;
+using Unity.Netcode;
 using UnityEngine;
 
-public class NetworkConnectionStateStartingHost : BaseNetworkConnectionStateOnline
+public class NetworkConnectionStateStartingHost : BaseNetworkConnectionStateConnecting
 {
+    private readonly SessionManager _sessionManager;
+
     public NetworkConnectionStateStartingHost(NetworkConnectionStateMachine networkConnectionStateMachine) : base(networkConnectionStateMachine)
     {
+        _sessionManager = ServiceLocator.Instance.GetService<SessionManager>(true);
     }
 
     public override void Enter()
     {
         base.Enter();
-        _networkManager.OnServerStarted += NetworkManager_OnServerStarted;
+        _networkManager.ConnectionApprovalCallback += NetworkManager_OnConnectionApprovalCallBack;
         StartHost();
     }
 
     public override void Exit()
     {
         base.Exit();
-        _networkManager.OnServerStarted -= NetworkManager_OnServerStarted;
+        _networkManager.ConnectionApprovalCallback -= NetworkManager_OnConnectionApprovalCallBack;
     }
 
     private void StartHost()
     {
+        SetNetworkConnectionData();
         if (!_networkManager.StartHost())
         {
             // POPUP
@@ -30,13 +35,17 @@ public class NetworkConnectionStateStartingHost : BaseNetworkConnectionStateOnli
         }
     }
 
-    private void NetworkManager_OnServerStarted()
+    protected override void NetworkManager_OnClientConnectedCallBack(ulong clientNetworkId)
     {
-        _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateHosting);
+        _networkManager.ConnectedClients[clientNetworkId].PlayerObject.GetComponent<PlayerNetworkObject>().PlayerName = _sessionManager.GetPlayerSessionData(clientNetworkId).playerName;
+        if (clientNetworkId == _networkManager.LocalClientId) _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateHosting);
     }
 
-    public override void OnClientDisconnect(ulong clientId)
+    private void NetworkManager_OnConnectionApprovalCallBack(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
     {
-        if(clientId == _networkManager.LocalClientId) base.OnClientDisconnect(clientId);
+        response.Approved = true;
+        response.CreatePlayerObject = true;
+        var connectionPayload = JsonUtility.FromJson<ConnectionPayload>(System.Text.Encoding.UTF8.GetString(request.Payload));
+        _sessionManager.AddPlayerSessionData(request.ClientNetworkId, new SessionData { clientNetworkId = request.ClientNetworkId, playerName = connectionPayload.playerName, unityServiceId = connectionPayload.unityServiceId });
     }
 }

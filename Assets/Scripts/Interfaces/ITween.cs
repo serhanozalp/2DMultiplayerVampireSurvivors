@@ -8,8 +8,8 @@ namespace Interfaces
     {
         public Action OnStartCallBack;
         public Action OnCompleteCallBack;
-        public float TweenDuration;
-        public Ease EaseType;
+        public float tweenDuration;
+        public Ease easeType;
     }
     public interface ITween
     {

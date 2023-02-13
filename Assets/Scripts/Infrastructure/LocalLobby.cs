@@ -3,41 +3,48 @@ using Abstracts;
 using System;
 using Unity.Services.Lobbies.Models;
 using System.Linq;
-using UnityEngine;
 using Unity.Services.Authentication;
+using Interfaces;
 
-public class LocalLobby 
+public class LocalLobby : IReset
 {
     public struct LobbyData
     {
-        public string LobbyName;
-        public string LobbyId;
-        public string RelayCode;
-        public bool IsPlayerTheHost;
-        public Dictionary<Type, BaseGameMode> GameModes;
+        public string lobbyName;
+        public string lobbyId;
+        public bool isActive;
+        public string relayCode;
+        public bool isPlayerTheHost;
+        public Dictionary<Type, BaseGameMode> gameModes;
     }
 
     private LobbyData _localLobbyData;
 
-    public string RelayCode { get => _localLobbyData.RelayCode; set { _localLobbyData.RelayCode = value; } }
-    public string LobbyId => _localLobbyData.LobbyId;
-    public bool IsPlayerTheHost => _localLobbyData.IsPlayerTheHost;
+    public string RelayCode { get => _localLobbyData.relayCode; set { _localLobbyData.relayCode = value; } }
+    public string LobbyId => _localLobbyData.lobbyId;
+    public bool IsPlayerTheHost => _localLobbyData.isPlayerTheHost;
+    public bool IsActive => _localLobbyData.isActive;
 
     public void SetLobbyData(Lobby lobby)
     {
         _localLobbyData = new LobbyData() {
-            LobbyName = lobby.Name,
-            LobbyId = lobby.Id,
-            GameModes = new Dictionary<Type, BaseGameMode>(),
-            IsPlayerTheHost = lobby.HostId == AuthenticationService.Instance.PlayerId,
-            RelayCode = lobby.Data[ConstantDictionary.KEY_LOBBY_OPTIONS_RELAYCODE].Value };
+            lobbyName = lobby.Name,
+            lobbyId = lobby.Id,
+            isActive = true,
+            relayCode = lobby.Data[ConstantDictionary.KEY_LOBBY_OPTIONS_RELAYCODE].Value,
+            isPlayerTheHost = lobby.HostId == AuthenticationService.Instance.PlayerId,
+            gameModes = new Dictionary<Type, BaseGameMode>()};
         var gameModeData = lobby.Data.Where(kvp => Type.GetType(kvp.Key)?.BaseType == typeof(BaseGameMode)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-        Debug.Log(AuthenticationService.Instance.PlayerId);
         foreach (var pair in gameModeData)
         {
             Type type = Type.GetType(pair.Key);
             var gameMode = GameModeDataSource.GetGameModeByTypeAndModeName(type, pair.Value.Value);
-            _localLobbyData.GameModes.Add(type, gameMode);
+            _localLobbyData.gameModes.Add(type, gameMode);
         }
+    }
+
+    public void Reset()
+    {
+        _localLobbyData = new LobbyData();
     }
 }

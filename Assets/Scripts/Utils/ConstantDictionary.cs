@@ -28,6 +28,6 @@ public static class ConstantDictionary
     public static readonly Ease MAINMENU_TWEEN_EASETYPE_MOVE = Ease.OutElastic;
     public static readonly int NETWORK_ISCONNECTED_WAIT_TIME = 7000;
     public static readonly int NETWORK_ISCONNECTED_CHECK_INTERVAL = 25;
-    public static readonly int LOBBYSERVICE_RATE_LIMIT_HEARTBEAT = 15000;
-    public static readonly int LOBBYSERVICE_RATE_LIMIT_GET = 1000;
+    public static readonly int LOBBYSERVICE_RATE_LIMIT_HEARTBEAT = 15000; 
+    public static readonly int LOBBYSERVICE_RATE_LIMIT_GET = 1000; 
 }

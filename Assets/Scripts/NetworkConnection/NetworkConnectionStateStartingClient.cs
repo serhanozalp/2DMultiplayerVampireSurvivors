@@ -1,28 +1,26 @@
 using Abstracts;
 using UnityEngine;
 
-public class NetworkConnectionStateStartingClient : BaseNetworkConnectionStateOnline
+public class NetworkConnectionStateStartingClient : BaseNetworkConnectionStateConnecting
 {
     public NetworkConnectionStateStartingClient(NetworkConnectionStateMachine networkConnectionStateMachine) : base(networkConnectionStateMachine)
     {
-
     }
 
     public override void Enter()
     {
         base.Enter();
-        _networkManager.OnClientConnectedCallback += NetworkManager_OnClientConnectedCallback;
         StartClient();
     }
 
     public override void Exit()
     {
         base.Exit();
-        _networkManager.OnClientConnectedCallback -= NetworkManager_OnClientConnectedCallback;
     }
 
     private void StartClient()
     {
+        SetNetworkConnectionData();
         if (!_networkManager.StartClient())
         {
             // POPUP
@@ -31,7 +29,7 @@ public class NetworkConnectionStateStartingClient : BaseNetworkConnectionStateOn
         }
     }
 
-    private void NetworkManager_OnClientConnectedCallback(ulong clientId)
+    protected override void NetworkManager_OnClientConnectedCallBack(ulong clientId)
     {
         _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateClientConnected);
     }

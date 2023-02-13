@@ -5,7 +5,7 @@ public class NetworkConnectionStateClientConnected : BaseNetworkConnectionStateO
     public NetworkConnectionStateClientConnected(NetworkConnectionStateMachine networkConnectionStateMachine) : base(networkConnectionStateMachine)
     {
     }
-
+    
     public override void Enter()
     {
         base.Enter();

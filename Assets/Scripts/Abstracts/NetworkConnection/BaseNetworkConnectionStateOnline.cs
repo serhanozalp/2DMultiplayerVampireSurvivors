@@ -16,7 +16,7 @@ namespace Abstracts
             _networkManager.OnClientDisconnectCallback -= OnClientDisconnect;
         }
 
-        public virtual void OnClientDisconnect(ulong clientId)
+        protected virtual void OnClientDisconnect(ulong clientNetworkId)
         {
             _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateOffline);
         }

@@ -58,7 +58,7 @@ public class CanvasGroupJoinLobby : BaseCanvasGroup
             }
         }
         var queriedLobbies = await _canvasGroupLobbyJoinCreate.QueryLobbiesAsync(selectedGameModeNameDictionary);
-        SetupLobbyListUI(queriedLobbies);
+        if(queriedLobbies!=null) SetupLobbyListUI(queriedLobbies);
     }
 
     private void ClearLobbyListUI()
@@ -72,7 +72,7 @@ public class CanvasGroupJoinLobby : BaseCanvasGroup
     private void SetupLobbyListUI(List<Lobby> queriedLobbies)
     {
         ClearLobbyListUI();
-        foreach (var lobby in queriedLobbies ?? new List<Lobby>())
+        foreach (var lobby in queriedLobbies)
         {
             AddLobbyListItemUI(lobby);
         }

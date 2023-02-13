@@ -9,8 +9,8 @@ namespace Abstracts
     {
         protected MainMenuMediator _mainMenuMediator;
 
-        private Vector2 _canvasGroupEnterPosition = new Vector3(1500f, 0f);
-        private Vector2 _canvasGroupExitPosition = new Vector3(-1500f, 0f);
+        protected Vector2 _canvasGroupEnterPosition = new Vector3(1500f, 0f);
+        protected Vector2 _canvasGroupExitPosition = new Vector3(-1500f, 0f);
 
         protected override void Awake()
         {
@@ -22,8 +22,8 @@ namespace Abstracts
         {
             StartPositionTween(Vector3.zero, _canvasGroupExitPosition, new TweenWrapper
             {
-                TweenDuration = ConstantDictionary.MAINMENU_TWEEN_DURATION_MOVE,
-                EaseType = ConstantDictionary.MAINMENU_TWEEN_EASETYPE_MOVE,
+                tweenDuration = ConstantDictionary.MAINMENU_TWEEN_DURATION_MOVE,
+                easeType = ConstantDictionary.MAINMENU_TWEEN_EASETYPE_MOVE,
                 OnStartCallBack = () =>  Block(),
                 OnCompleteCallBack = () => Unblock()
             }).Play();
@@ -33,8 +33,8 @@ namespace Abstracts
         {
             StartPositionTween(_canvasGroupEnterPosition, Vector3.zero, new TweenWrapper
             {
-                TweenDuration = ConstantDictionary.MAINMENU_TWEEN_DURATION_MOVE,
-                EaseType = ConstantDictionary.MAINMENU_TWEEN_EASETYPE_MOVE,
+                tweenDuration = ConstantDictionary.MAINMENU_TWEEN_DURATION_MOVE,
+                easeType = ConstantDictionary.MAINMENU_TWEEN_EASETYPE_MOVE,
                 OnStartCallBack = () => Block(),
                 OnCompleteCallBack = () => Unblock()
             }).Play();
@@ -42,9 +42,9 @@ namespace Abstracts
 
         public Tween StartPositionTween(Vector3 startPosition, Vector3 endPosition, TweenWrapper tweenWrapper)
         {
-            return _myRectTransform.DOAnchorPos(endPosition.ToVector2(), tweenWrapper.TweenDuration, true)
+            return _myRectTransform.DOAnchorPos(endPosition.ToVector2(), tweenWrapper.tweenDuration, true)
                 .From(startPosition.ToVector2())
-                .SetEase(tweenWrapper.EaseType)
+                .SetEase(tweenWrapper.easeType)
                 .OnStart(() => tweenWrapper.OnStartCallBack())
                 .OnComplete(() => tweenWrapper.OnCompleteCallBack());
         }

@@ -45,8 +45,8 @@ public class Popup : BaseCanvasGroup, ITweenFade, ITweenPosition, ITweenScale
     {
         StartFadeTween(1f, 0f, new TweenWrapper
         {
-            TweenDuration = ConstantDictionary.PopupConstantDictionary.POPUP_TWEEN_DURATION_FADE,
-            EaseType = ConstantDictionary.PopupConstantDictionary.POPUP_TWEEN_EASETYPE_FADE,
+            tweenDuration = ConstantDictionary.PopupConstantDictionary.POPUP_TWEEN_DURATION_FADE,
+            easeType = ConstantDictionary.PopupConstantDictionary.POPUP_TWEEN_EASETYPE_FADE,
             OnStartCallBack = () => Block(),
             OnCompleteCallBack = () => { Unblock(); _onHiddenCallBack(this); }
         }).Play();
@@ -55,8 +55,8 @@ public class Popup : BaseCanvasGroup, ITweenFade, ITweenPosition, ITweenScale
     public override void Show()
     {
         StartScaleTween(Vector3.zero, Vector3.one, new TweenWrapper {
-            TweenDuration = ConstantDictionary.PopupConstantDictionary.POPUP_TWEEN_DURATION_SCALE,
-            EaseType = ConstantDictionary.PopupConstantDictionary.POPUP_TWEEN_EASETYPE_SCALE,
+            tweenDuration = ConstantDictionary.PopupConstantDictionary.POPUP_TWEEN_DURATION_SCALE,
+            easeType = ConstantDictionary.PopupConstantDictionary.POPUP_TWEEN_EASETYPE_SCALE,
             OnStartCallBack = () => Block(),
             OnCompleteCallBack = () => Unblock()
         }).Play();
@@ -64,9 +64,9 @@ public class Popup : BaseCanvasGroup, ITweenFade, ITweenPosition, ITweenScale
 
     public Tween StartFadeTween(float startAlpha, float endAlpha, TweenWrapper tweenWrapper)
     {
-        return _myCanvasGroup.DOFade(endAlpha, tweenWrapper.TweenDuration)
+        return _myCanvasGroup.DOFade(endAlpha, tweenWrapper.tweenDuration)
             .From(startAlpha)
-            .SetEase(tweenWrapper.EaseType)
+            .SetEase(tweenWrapper.easeType)
             .OnStart(() => tweenWrapper.OnStartCallBack())
             .OnComplete(() => tweenWrapper.OnCompleteCallBack())
             .SetLink(this.gameObject, LinkBehaviour.KillOnDestroy);
@@ -74,9 +74,9 @@ public class Popup : BaseCanvasGroup, ITweenFade, ITweenPosition, ITweenScale
 
     public Tween StartPositionTween(Vector3 startPosition, Vector3 endPosition, TweenWrapper tweenWrapper)
     {
-        return _myRectTransform.DOAnchorPos(endPosition, tweenWrapper.TweenDuration)
+        return _myRectTransform.DOAnchorPos(endPosition, tweenWrapper.tweenDuration)
             .From(startPosition)
-            .SetEase(tweenWrapper.EaseType)
+            .SetEase(tweenWrapper.easeType)
             .OnStart(() => tweenWrapper.OnStartCallBack())
             .OnComplete(() => tweenWrapper.OnCompleteCallBack())
             .SetLink(this.gameObject, LinkBehaviour.KillOnDestroy);
@@ -84,9 +84,9 @@ public class Popup : BaseCanvasGroup, ITweenFade, ITweenPosition, ITweenScale
 
     public Tween StartScaleTween(Vector3 startScale, Vector3 endScale, TweenWrapper tweenWrapper)
     {
-        return _myRectTransform.DOScale(endScale, tweenWrapper.TweenDuration)
+        return _myRectTransform.DOScale(endScale, tweenWrapper.tweenDuration)
             .From(startScale)
-            .SetEase(tweenWrapper.EaseType)
+            .SetEase(tweenWrapper.easeType)
             .OnStart(() => tweenWrapper.OnStartCallBack())
             .OnComplete(() => tweenWrapper.OnCompleteCallBack())
             .SetLink(this.gameObject, LinkBehaviour.KillOnDestroy);

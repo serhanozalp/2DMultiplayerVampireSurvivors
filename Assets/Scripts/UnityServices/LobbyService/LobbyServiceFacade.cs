@@ -5,19 +5,9 @@ using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using Abstracts;
-using Extensions;
 
 public class LobbyServiceFacade : BaseLobbyServiceFacade
 {
-    private readonly LocalLobby _localLobby;
-    private readonly LobbyPoller _lobbyPoller;
-
-    public LobbyServiceFacade()
-    {
-        _localLobby = ServiceLocator.Instance.GetService<LocalLobby>(true);
-        _lobbyPoller = new LobbyPoller(this, _localLobby);
-    }
-
     public override async void TrySendHeartBeatPingAsync(string lobbyId)
     {
         try
@@ -31,81 +21,91 @@ public class LobbyServiceFacade : BaseLobbyServiceFacade
         }
     }
 
-    public override async void TryGetLobbyAsync(string lobbyId)
+    public override async Task<bool> TryDeleteLobbyAsync(string lobbyId)
     {
         try
         {
-            var lobby = await LobbyService.Instance.GetLobbyAsync(lobbyId);
-            _localLobby.SetLobbyData(lobby);
-        }
-        catch (LobbyServiceException)
-        {
-            // POPUP
-            Debug.LogError("Error while getting the lobby!");
-        }
-    }
-
-    public override async Task<bool> TryJoinLobbyByIdAsync(string lobbyId)
-    {
-        try
-        {
-            var lobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId);
-            _localLobby.SetLobbyData(lobby);
-            _lobbyPoller.StartPolling();
+            await LobbyService.Instance.DeleteLobbyAsync(lobbyId);
             return true;
         }
         catch (LobbyServiceException)
         {
             // POPUP
-            Debug.LogError("Error while joining lobby!");
+            Debug.LogError("Error while deleting the lobby!");
             return false;
         }
     }
 
-    public override async Task<bool> TryCreateLobbyAsync(string lobbyName, Dictionary<Type,string> selectedGameModeNameDictionary)
+    public override async Task<bool> TryRemovePlayerAsync(string lobbyId, string playerId)
+    {
+        try
+        {
+            await LobbyService.Instance.RemovePlayerAsync(lobbyId, playerId);
+            return true;
+        }
+        catch (LobbyServiceException)
+        {
+            // POPUP
+            Debug.LogError("Error while removing the player from lobby!");
+            return false;
+        }
+    }
+
+    public override async Task<(bool isSuccessful, Lobby joinedLobby)> TryJoinLobbyByIdAsync(string lobbyId)
+    {
+        try
+        {
+            var lobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId);
+            return (true, lobby);
+        }
+        catch (LobbyServiceException)
+        {
+            // POPUP
+            Debug.LogError("Error while joining lobby!");
+            return (false, null);
+        }
+    }
+
+    public override async Task<(bool isSuccessful, Lobby joinedLobby)> TryJoinLobbyByCodeAsync(string lobbyCode)
+    {
+        try
+        {
+            var lobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
+            return (true, lobby);
+        }
+        catch (LobbyServiceException)
+        {
+            // POPUP
+            Debug.LogError("Error while joining lobby!");
+            return (false, null);
+        }
+    }
+
+    public override async Task<(bool isSuccessful, Lobby createdLobby)> TryCreateLobbyAsync(string lobbyName, CreateLobbyOptions createLobbyOptions)
     {
         try
         {
             if (!IsLobbyNameValid(lobbyName))
             {
                 PopupManager.Instance.AddPopup("Lobby Name Error", "Lobby Name Is Not Valid!");
-                return false;
+                return (false, null);
             }
-            var lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, ConstantDictionary.GAMEPLAY_MAX_PLAYERS, GenerateCreateLobbyOptions(selectedGameModeNameDictionary));
-            _localLobby.SetLobbyData(lobby);
-            _lobbyPoller.StartPolling();
-            return true;
+            var lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, ConstantDictionary.GAMEPLAY_MAX_PLAYERS, createLobbyOptions);
+            return (true, lobby);
         }
         catch (LobbyServiceException)
         {
             // POPUP
             Debug.LogError("Error while creating lobby!");
-            return false;
+            return (false, null);
         }
     }
 
-    private CreateLobbyOptions GenerateCreateLobbyOptions(Dictionary<Type, string> selectedGameModeNameDictionary)
-    {
-        CreateLobbyOptions createLobbyOptions = new CreateLobbyOptions { IsPrivate = false };
-        createLobbyOptions.Data = new Dictionary<string, DataObject>();
-        foreach (var pair in selectedGameModeNameDictionary)
-        {
-            Type type = pair.Key;
-            createLobbyOptions.Data.Add(pair.Key.ToString(), new DataObject(
-                DataObject.VisibilityOptions.Public,
-                pair.Value,
-                GameModeDataSource.GetGameModeByTypeAndModeName(type, pair.Value).DataObjectIndexOptions));
-        }
-        createLobbyOptions.Data.Add(ConstantDictionary.KEY_LOBBY_OPTIONS_RELAYCODE, new DataObject(
-            DataObject.VisibilityOptions.Public, _localLobby.RelayCode ?? ""));
-        return createLobbyOptions;
-    }
-
-    public override async Task<List<Lobby>> TryQueryLobbiesAsync(Dictionary<Type, string> selectedGameModeNameDictionary)
+    public override async Task<List<Lobby>> TryQueryLobbiesAsync(QueryLobbiesOptions queryLobbiesOptions)
     {
         try
         {
-            var queriedLobbies = await LobbyService.Instance.QueryLobbiesAsync(GenerateQueryLobbiesOptions(selectedGameModeNameDictionary));
+            var queriedLobbies = await LobbyService.Instance.QueryLobbiesAsync(queryLobbiesOptions);
             return queriedLobbies.Results;
         }
         catch (LobbyServiceException)
@@ -114,20 +114,5 @@ public class LobbyServiceFacade : BaseLobbyServiceFacade
             Debug.LogError("Error while querrying lobbies!");
             return null;
         }
-    }
-
-    private QueryLobbiesOptions GenerateQueryLobbiesOptions(Dictionary<Type, string> selectedGameModeNameDictionary)
-    {
-        QueryLobbiesOptions queryLobbiesOptions = new QueryLobbiesOptions();
-        queryLobbiesOptions.Filters = new List<QueryFilter>();
-        foreach (var pair in selectedGameModeNameDictionary)
-        {
-            Type type = pair.Key;
-            queryLobbiesOptions.Filters.Add(new QueryFilter(
-                GameModeDataSource.GetGameModeByTypeAndModeName(type, pair.Value).DataObjectIndexOptions.ToQueryFilterFieldOptions(),
-                pair.Value,
-                QueryFilter.OpOptions.EQ));
-        }
-        return queryLobbiesOptions;
     }
 }
