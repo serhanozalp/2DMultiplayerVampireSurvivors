@@ -1,23 +1,23 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using Abstracts;
 
-public class MessageChannel<T> where T : struct
+public class MessageChannel<T> : BaseMessageChannel<T>
 {
-    private readonly List<Action<T>> _subscriberList = new List<Action<T>>();
-
-    public void Publish(T message)
+    public override void Publish(T message)
     {
-
-    }
-    public void Subscribe(Action<T> action)
-    {
-
+        foreach (var action in _runtimeList)
+        {
+            action?.Invoke(message);
+        }
     }
 
-    public void Unsubscribe(Action<T> action)
+    public override void Subscribe(Action<T> action)
     {
+        _runtimeList.Add(action);
+    }
 
+    public override void Unsubscribe(Action<T> action)
+    {
+        _runtimeList.Remove(action);
     }
 }

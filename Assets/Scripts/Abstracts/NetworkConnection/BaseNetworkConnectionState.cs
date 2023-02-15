@@ -6,11 +6,13 @@ namespace Abstracts
     {
         protected readonly NetworkConnectionStateMachine _networkConnectionStateMachine;
         protected readonly NetworkManager _networkManager;
+        protected readonly BaseMessageChannel<ConnectionEventMessage> _connectionEventMessageChannel;
 
         public BaseNetworkConnectionState(NetworkConnectionStateMachine networkConnectionStateMachine)
         {
             _networkConnectionStateMachine = networkConnectionStateMachine;
-            _networkManager = ServiceLocator.Instance.GetService<NetworkManager>();
+            _networkManager = ServiceLocator.Instance.GetService<NetworkManager>(true);
+            _connectionEventMessageChannel = ServiceLocator.Instance.GetService<MessageChannel<ConnectionEventMessage>>(true);
         }
         public abstract void Enter();
 

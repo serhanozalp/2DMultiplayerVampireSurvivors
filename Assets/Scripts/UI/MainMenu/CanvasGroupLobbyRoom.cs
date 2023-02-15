@@ -12,13 +12,11 @@ public class CanvasGroupLobbyRoom : BaseMainMenuCanvasGroup
     protected override void Awake()
     {
         base.Awake();
-        _buttonQuitLobby.onClick.AddListener(() => ButtonQuitLobbyClickedAsync());
+        _buttonQuitLobby.onClick.AddListener(() => ButtonQuitLobbyClicked());
     }
 
-    private async void ButtonQuitLobbyClickedAsync()
+    private void ButtonQuitLobbyClicked()
     {
-        Block();
-        await _mainMenuMediator.QuitLobbyAsync();
-        Unblock();
+        _mainMenuMediator.QuitLobby();
     }
 }

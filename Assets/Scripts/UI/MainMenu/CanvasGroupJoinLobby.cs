@@ -21,19 +21,74 @@ public class CanvasGroupJoinLobby : BaseCanvasGroup
     private LobbyListItemUI _prefabLobbyListItemUI;
     [SerializeField]
     private Toggle _toggleUseFilters;
+    [SerializeField]
+    private MainMenuMediator _mainMenuMediator;
 
     private List<Dropdown> _dropDownList;
+    private BaseMessageChannel<QueriedLobbyListMessage> _queriedLobbyListMessageChannel;
 
     protected override void Awake()
     {
         base.Awake();
         _dropDownList = new List<Dropdown>();
-        _buttonResfreshLobbies.onClick.AddListener(ButtonRefreshLobbiesClickedAsync);
+        _queriedLobbyListMessageChannel = ServiceLocator.Instance.GetService<MessageChannel<QueriedLobbyListMessage>>();
+        _buttonResfreshLobbies.onClick.AddListener(ButtonRefreshLobbiesClicked);
+    }
+
+    private void OnEnable()
+    {
+        _queriedLobbyListMessageChannel.Subscribe(queriedLobbyListMessage => HandleQueriedLobbyListMessage(queriedLobbyListMessage));
     }
 
     private void Start()
     {
         SetupGameModeDropDowns();
+    }
+
+    private void OnDisable()
+    {
+        _queriedLobbyListMessageChannel.Unsubscribe(queriedLobbyListMessage => HandleQueriedLobbyListMessage(queriedLobbyListMessage));
+    }
+
+    private void ButtonRefreshLobbiesClicked()
+    {
+        Dictionary<Type, string> selectedGameModeNameDictionary = new Dictionary<Type, string>();
+        if (_toggleUseFilters.isOn)
+        {
+            foreach (var dropDown in _dropDownList)
+            {
+                selectedGameModeNameDictionary.Add(Type.GetType(dropDown.name), dropDown.options[dropDown.value].text);
+            }
+        }
+        _mainMenuMediator.QueryLobbies(selectedGameModeNameDictionary);
+    }
+
+    private void HandleQueriedLobbyListMessage(QueriedLobbyListMessage queriedLobbyListMessage)
+    {
+        SetupLobbyListUI(queriedLobbyListMessage.queriedLobbyList ?? new List<Lobby>());
+    }
+
+    private void SetupLobbyListUI(List<Lobby> queriedLobbies)
+    {
+        ClearLobbyListUI();
+        foreach (var lobby in queriedLobbies)
+        {
+            AddLobbyListItemUI(lobby);
+        }
+    }
+
+    private void ClearLobbyListUI()
+    {
+        for (int i = 0; i < _lobbyListContainer.childCount; i++)
+        {
+            Destroy(_lobbyListContainer.GetChild(i).gameObject);
+        }
+    }
+
+    private void AddLobbyListItemUI(Lobby lobby)
+    {
+        var lobbyListItemUI = Instantiate(_prefabLobbyListItemUI, _lobbyListContainer);
+        lobbyListItemUI.Setup(lobby, JoinLobby);
     }
 
     private void SetupGameModeDropDowns()
@@ -47,46 +102,9 @@ public class CanvasGroupJoinLobby : BaseCanvasGroup
         }
     }
 
-    private async void ButtonRefreshLobbiesClickedAsync()
-    {
-        Dictionary<Type, string> selectedGameModeNameDictionary = new Dictionary<Type, string>();
-        if (_toggleUseFilters.isOn)
-        {
-            foreach (var dropDown in _dropDownList)
-            {
-                selectedGameModeNameDictionary.Add(Type.GetType(dropDown.name), dropDown.options[dropDown.value].text);
-            }
-        }
-        var queriedLobbies = await _canvasGroupLobbyJoinCreate.QueryLobbiesAsync(selectedGameModeNameDictionary);
-        if(queriedLobbies!=null) SetupLobbyListUI(queriedLobbies);
-    }
-
-    private void ClearLobbyListUI()
-    {
-        for (int i = 0; i < _lobbyListContainer.childCount; i++)
-        {
-            Destroy(_lobbyListContainer.GetChild(i).gameObject);
-        }
-    }
-
-    private void SetupLobbyListUI(List<Lobby> queriedLobbies)
-    {
-        ClearLobbyListUI();
-        foreach (var lobby in queriedLobbies)
-        {
-            AddLobbyListItemUI(lobby);
-        }
-    }
-
-    private void AddLobbyListItemUI(Lobby lobby)
-    {
-        var lobbyListItemUI = Instantiate(_prefabLobbyListItemUI, _lobbyListContainer);
-        lobbyListItemUI.Setup(lobby, JoinLobby);
-    }
-
     private void JoinLobby(LobbyListItemUI sender)
     {
-        _canvasGroupLobbyJoinCreate.JoinLobbyAsync(sender.Lobby);
+        _mainMenuMediator.JoinLobby(sender.Lobby);
     }
 
     public override void Hide()

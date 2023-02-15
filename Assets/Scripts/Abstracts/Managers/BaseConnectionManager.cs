@@ -1,10 +1,19 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Unity.Netcode;
 using Unity.Services.Lobbies.Models;
-using UnityEngine;
+
+public enum ConnectionEventMessage
+{
+    StartedShutdown,
+    Connected,
+    ShutdownComplete,
+    ShutdownFailed,
+    StartingHostFailed,
+    StartingClientFailed,
+    DisconnectedHostShutdown,
+    DisconnectedServerFull
+}
 
 namespace Abstracts
 {
@@ -16,6 +25,7 @@ namespace Abstracts
         protected readonly NetworkConnectionStateMachine _networkConnectionStateMachine;
         protected readonly NetworkManager _networkManager;
         protected readonly LocalLobby _localLobby;
+        protected readonly BaseMessageChannel<ConnectionEventMessage> _connectionEventMessageChannel;
         protected readonly LobbyPing _lobbyPing;
 
         public BaseConnectionManager()
@@ -26,16 +36,17 @@ namespace Abstracts
             _networkConnectionStateMachine = ServiceLocator.Instance.GetService<NetworkConnectionStateMachine>(true);
             _networkManager = ServiceLocator.Instance.GetService<NetworkManager>(true);
             _localLobby = ServiceLocator.Instance.GetService<LocalLobby>(true);
+            _connectionEventMessageChannel = ServiceLocator.Instance.GetService<MessageChannel<ConnectionEventMessage>>(true);
             _lobbyPing = new LobbyPing(_lobbyServiceFacade);
         }
 
-        public abstract Task<bool> QuitLobbyAsync(bool forceQuit = false);
+        public abstract void StartClientAsync(Lobby lobby);
 
-        public abstract Task<bool> JoinLobbyAsync(Lobby lobby);
+        public abstract void StartHostAsync(string lobbyName, Dictionary<Type, string> selectedGameModeNameDictionary);
 
-        public abstract Task<bool> CreateLobbyAsync(string lobbyName, Dictionary<Type, string> selectedGameModeNameDictionary);
+        public abstract void ShutdownAsync(bool forceQuit = false);
 
-        public abstract Task<List<Lobby>> QueryLobbiesAsync(Dictionary<Type, string> selectedGameModeNameDictionary);
+        public abstract void QueryLobbies(Dictionary<Type, string> selectedGameModeNameDictionary);
     }
 }
 

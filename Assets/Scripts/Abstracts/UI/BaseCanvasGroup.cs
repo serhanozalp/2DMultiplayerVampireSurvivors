@@ -16,11 +16,11 @@ namespace Abstracts
 
         public abstract void Show();
         public abstract void Hide();
-        protected void Block()
+        public void Block()
         {
             _myCanvasGroup.interactable = false;
         }
-        protected void Unblock()
+        public void Unblock()
         {
             _myCanvasGroup.interactable = true;
         }

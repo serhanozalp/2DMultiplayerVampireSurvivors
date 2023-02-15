@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class NetworkConnectionStateStartingHost : BaseNetworkConnectionStateConnecting
 {
-    private readonly SessionManager _sessionManager;
+    private readonly BaseSessionManager _sessionManager;
 
     public NetworkConnectionStateStartingHost(NetworkConnectionStateMachine networkConnectionStateMachine) : base(networkConnectionStateMachine)
     {
@@ -37,7 +37,8 @@ public class NetworkConnectionStateStartingHost : BaseNetworkConnectionStateConn
 
     protected override void NetworkManager_OnClientConnectedCallBack(ulong clientNetworkId)
     {
-        _networkManager.ConnectedClients[clientNetworkId].PlayerObject.GetComponent<PlayerNetworkObject>().PlayerName = _sessionManager.GetPlayerSessionData(clientNetworkId).playerName;
+        if (_sessionManager.TryGetValue(clientNetworkId, out SessionData sessionData))
+            _networkManager.ConnectedClients[clientNetworkId].PlayerObject.GetComponent<PlayerNetworkObject>().PlayerName = sessionData.playerName;
         if (clientNetworkId == _networkManager.LocalClientId) _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateHosting);
     }
 
@@ -46,6 +47,6 @@ public class NetworkConnectionStateStartingHost : BaseNetworkConnectionStateConn
         response.Approved = true;
         response.CreatePlayerObject = true;
         var connectionPayload = JsonUtility.FromJson<ConnectionPayload>(System.Text.Encoding.UTF8.GetString(request.Payload));
-        _sessionManager.AddPlayerSessionData(request.ClientNetworkId, new SessionData { clientNetworkId = request.ClientNetworkId, playerName = connectionPayload.playerName, unityServiceId = connectionPayload.unityServiceId });
+        _sessionManager.AddToDictionary(request.ClientNetworkId, new SessionData { clientNetworkId = request.ClientNetworkId, playerName = connectionPayload.playerName, unityServiceId = connectionPayload.unityServiceId });
     }
 }

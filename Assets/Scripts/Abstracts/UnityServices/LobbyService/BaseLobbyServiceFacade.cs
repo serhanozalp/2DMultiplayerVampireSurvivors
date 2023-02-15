@@ -4,13 +4,18 @@ using System;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Lobbies;
 
+public struct QueriedLobbyListMessage
+{
+    public List<Lobby> queriedLobbyList;
+}
+
 namespace Abstracts
 {
     public abstract class BaseLobbyServiceFacade 
     {
         public abstract Task<(bool isSuccessful, Lobby createdLobby)> TryCreateLobbyAsync(string lobbyName, CreateLobbyOptions createLobbyOptions);
 
-        public abstract Task<List<Lobby>> TryQueryLobbiesAsync(QueryLobbiesOptions queryLobbiesOptions);
+        public abstract Task<(bool isSuccessful, List<Lobby> queriedLobbyList)> TryQueryLobbiesAsync(QueryLobbiesOptions queryLobbiesOptions);
 
         public abstract Task<(bool isSuccessful, Lobby joinedLobby)> TryJoinLobbyByIdAsync(string lobbyId);
 
@@ -24,7 +29,7 @@ namespace Abstracts
 
         protected bool IsLobbyNameValid(string lobbyName)
         {
-            return String.IsNullOrWhiteSpace(lobbyName) ? false : true;
+            return !String.IsNullOrWhiteSpace(lobbyName);
         }
     }
 }

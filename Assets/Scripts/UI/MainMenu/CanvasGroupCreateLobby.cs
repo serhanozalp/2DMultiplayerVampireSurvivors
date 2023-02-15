@@ -17,6 +17,8 @@ public class CanvasGroupCreateLobby : BaseCanvasGroup
     private Button _buttonCreateLobby;
     [SerializeField]
     private TMP_InputField _inputFieldLobbyName;
+    [SerializeField]
+    private MainMenuMediator _mainMenuMediator;
 
     private List<Dropdown> _dropDownList;
 
@@ -39,7 +41,7 @@ public class CanvasGroupCreateLobby : BaseCanvasGroup
         {
             selectedGameModeNameDictionary.Add(Type.GetType(dropDown.name), dropDown.options[dropDown.value].text);
         }
-        _canvasGroupLobbyJoinCreate.CreateLobbyAsync(_inputFieldLobbyName.text, selectedGameModeNameDictionary);
+        _mainMenuMediator.CreateLobby(_inputFieldLobbyName.text, selectedGameModeNameDictionary);
     }
 
     private void SetupGameModeDropDowns()

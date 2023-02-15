@@ -2,15 +2,16 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEditor;
 using System.Collections;
-using System.Threading.Tasks;
-using System;
+using Abstracts;
 
 public class ApplicationManager : MonoBehaviour
 {
-    private ConnectionManager _connectionManager;
+    private BaseConnectionManager _connectionManager;
     private LocalLobby _localLobby;
     private void Awake()
     {
+        ServiceLocator.Instance.RegisterService(new MessageChannel<ConnectionEventMessage>());
+        ServiceLocator.Instance.RegisterService(new MessageChannel<QueriedLobbyListMessage>());
         ServiceLocator.Instance.RegisterService(new LocalLobby());
         ServiceLocator.Instance.RegisterService(new ProfileManagerPlayerPrefs());
         ServiceLocator.Instance.RegisterService(new RelayServiceFacade());
@@ -18,10 +19,10 @@ public class ApplicationManager : MonoBehaviour
         ServiceLocator.Instance.RegisterService(new LobbyServiceFacade());
         ServiceLocator.Instance.RegisterService(new SessionManager()); // We are creating this for both client and host. We should change this by creating only for host.
         ServiceLocator.Instance.RegisterService(new NetworkConnectionStateMachine());
-        ServiceLocator.Instance.RegisterService(new ConnectionManager());
+        ServiceLocator.Instance.RegisterService(new ConnectionManagerCommandPattern());
 
         DontDestroyOnLoad(this);
-        _connectionManager = ServiceLocator.Instance.GetService<ConnectionManager>();
+        _connectionManager = ServiceLocator.Instance.GetService<ConnectionManagerCommandPattern>();
         _localLobby = ServiceLocator.Instance.GetService<LocalLobby>();
     }
     private void Start()
@@ -60,9 +61,7 @@ public class ApplicationManager : MonoBehaviour
 
     private IEnumerator LeaveLobbyBeforeQuit()
     {
-#pragma warning disable
-        _connectionManager.QuitLobbyAsync(true);
-#pragma warning enable
+        _connectionManager.ShutdownAsync(true);
         yield return new WaitUntil(() => { return _localLobby.IsActive == false; });
         QuitApplication();
     }

@@ -101,18 +101,18 @@ public class LobbyServiceFacade : BaseLobbyServiceFacade
         }
     }
 
-    public override async Task<List<Lobby>> TryQueryLobbiesAsync(QueryLobbiesOptions queryLobbiesOptions)
+    public override async Task<(bool isSuccessful, List<Lobby> queriedLobbyList)> TryQueryLobbiesAsync(QueryLobbiesOptions queryLobbiesOptions)
     {
         try
         {
             var queriedLobbies = await LobbyService.Instance.QueryLobbiesAsync(queryLobbiesOptions);
-            return queriedLobbies.Results;
+            return (true, queriedLobbies.Results);
         }
         catch (LobbyServiceException)
         {
             // POPUP
             Debug.LogError("Error while querrying lobbies!");
-            return null;
+            return (false, null);
         }
     }
 }

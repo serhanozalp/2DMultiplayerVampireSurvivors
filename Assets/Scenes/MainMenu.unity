@@ -906,6 +906,7 @@ MonoBehaviour:
   _dropDownContainer: {fileID: 117448234}
   _buttonCreateLobby: {fileID: 956101665}
   _inputFieldLobbyName: {fileID: 2049717031}
+  _mainMenuMediator: {fileID: 616388054}
 --- !u!1 &434678599
 GameObject:
   m_ObjectHideFlags: 0
@@ -4860,6 +4861,7 @@ MonoBehaviour:
   _dropDownContainer: {fileID: 1387727302}
   _prefabLobbyListItemUI: {fileID: 6666701904465879164, guid: ff380a4894f11ad4195bdeacdeab0e90, type: 3}
   _toggleUseFilters: {fileID: 4057952006057216097}
+  _mainMenuMediator: {fileID: 616388054}
 --- !u!1 &1593243946
 GameObject:
   m_ObjectHideFlags: 0

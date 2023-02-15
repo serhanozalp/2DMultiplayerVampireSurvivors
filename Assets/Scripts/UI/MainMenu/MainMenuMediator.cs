@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Abstracts;
 using System;
 using Unity.Services.Lobbies.Models;
-using System.Threading.Tasks;
 
 public class MainMenuMediator : MonoBehaviour
 {
@@ -15,17 +14,34 @@ public class MainMenuMediator : MonoBehaviour
     private BaseMainMenuCanvasGroup _currentCanvasGroup;
     private BaseProfileManager _profileManager;
     private ApplicationManager _applicationManager;
-    private ConnectionManager _connectionManager;
+    private BaseConnectionManager _connectionManager;
+    private BaseMessageChannel<ConnectionEventMessage> _connectionEventMessageChannel;
+    private BaseMessageChannel<QueriedLobbyListMessage> _queriedLobbyListMessageChannel;
 
     private void Awake()
     {
         _profileManager = ServiceLocator.Instance.GetService<ProfileManagerPlayerPrefs>();
         _applicationManager = ServiceLocator.Instance.GetService<ApplicationManager>();
-        _connectionManager = ServiceLocator.Instance.GetService<ConnectionManager>();
+        _connectionManager = ServiceLocator.Instance.GetService<ConnectionManagerCommandPattern>();
+        _connectionEventMessageChannel = ServiceLocator.Instance.GetService<MessageChannel<ConnectionEventMessage>>();
+        _queriedLobbyListMessageChannel = ServiceLocator.Instance.GetService<MessageChannel<QueriedLobbyListMessage>>();
     }
+
+    private void OnEnable()
+    {
+        _connectionEventMessageChannel.Subscribe(connectionEventMessage => HandleConnectionEventMessage(connectionEventMessage));
+        _queriedLobbyListMessageChannel.Subscribe(queriedLobbyListMessage => HandleQueriedLobbyListMessage(queriedLobbyListMessage));
+    }
+
     private void Start()
     {
         ShowCanvasGroupStartGame();
+    }
+
+    private void OnDisable()
+    {
+        _connectionEventMessageChannel.Unsubscribe(connectionEventMessage => HandleConnectionEventMessage(connectionEventMessage));
+        _queriedLobbyListMessageChannel.Unsubscribe(queriedLobbyListMessage => HandleQueriedLobbyListMessage(queriedLobbyListMessage));
     }
 
     #region Menu Show/Hide
@@ -79,36 +95,74 @@ public class MainMenuMediator : MonoBehaviour
     }
     #endregion
 
-    #region LobbyService
-    public async Task CreateLobbyAsync(string lobbyName, Dictionary<Type, string> selectedGameModeNameDictionary)
+    #region ConnectionManager
+    public void CreateLobby(string lobbyName, Dictionary<Type, string> selectedGameModeNameDictionary)
     {
-        _loadingSpinner.SetActive(true);
-        if(await _connectionManager.CreateLobbyAsync(lobbyName,selectedGameModeNameDictionary)) ShowCanvasGroupLobbyRoom();
-        _loadingSpinner.SetActive(false);
+        ConfigureUiForAsyncOperations(true);
+        _connectionManager.StartHostAsync(lobbyName, selectedGameModeNameDictionary);
     }
 
-    public async Task<List<Lobby>> QueryLobbiesAsync(Dictionary<Type, string> selectedGameModeNameDictionary)
+    public void JoinLobby(Lobby lobby)
     {
-        _loadingSpinner.SetActive(true);
-        var queriedLobbies = await _connectionManager.QueryLobbiesAsync(selectedGameModeNameDictionary);
-        _loadingSpinner.SetActive(false);
-        return queriedLobbies;
+        ConfigureUiForAsyncOperations(true);
+        _connectionManager.StartClientAsync(lobby);
     }
 
-    public async Task JoinLobbyAsync(Lobby lobby)
+    public void QueryLobbies(Dictionary<Type, string> selectedGameModeNameDictionary)
     {
-        _loadingSpinner.SetActive(true);
-        if(await _connectionManager.JoinLobbyAsync(lobby)) ShowCanvasGroupLobbyRoom();
-        _loadingSpinner.SetActive(false);
+        ConfigureUiForAsyncOperations(true);
+        _connectionManager.QueryLobbies(selectedGameModeNameDictionary);
     }
 
-    public async Task QuitLobbyAsync()
+    public void QuitLobby()
     {
-        _loadingSpinner.SetActive(true);
-        if (await _connectionManager.QuitLobbyAsync()) ShowCanvasGroupLobbyJoinCreate();
-        _loadingSpinner.SetActive(false);
+        _connectionManager.ShutdownAsync();
+    }
+
+    private void HandleConnectionEventMessage(ConnectionEventMessage connectionEventMessage)
+    {
+        switch (connectionEventMessage)
+        {
+            case ConnectionEventMessage.Connected:
+                ConfigureUiForAsyncOperations(false);
+                ShowCanvasGroupLobbyRoom();
+                break;
+            case ConnectionEventMessage.StartedShutdown:
+                ConfigureUiForAsyncOperations(true);
+                break;
+            case ConnectionEventMessage.ShutdownComplete:
+                ConfigureUiForAsyncOperations(false);
+                ShowCanvasGroupLobbyJoinCreate();
+                break;
+            case ConnectionEventMessage.DisconnectedHostShutdown:
+                ConfigureUiForAsyncOperations(false);
+                ShowCanvasGroupLobbyJoinCreate();
+                break;
+            default:
+                ConfigureUiForAsyncOperations(false);
+                break;
+        }
+    }
+
+    private void HandleQueriedLobbyListMessage(QueriedLobbyListMessage queriedLobbyListMessage)
+    {
+        ConfigureUiForAsyncOperations(false);
     }
     #endregion
+
+    private void ConfigureUiForAsyncOperations(bool block)
+    {
+        if (block)
+        {
+            _loadingSpinner.SetActive(true);
+            _currentCanvasGroup.Block();
+        }
+        else
+        {
+            _loadingSpinner.SetActive(false);
+            _currentCanvasGroup.Unblock();
+        }
+    }
 
     public void QuitGame()
     {
