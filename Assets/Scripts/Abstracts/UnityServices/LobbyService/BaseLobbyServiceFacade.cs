@@ -13,24 +13,19 @@ namespace Abstracts
 {
     public abstract class BaseLobbyServiceFacade 
     {
-        public abstract Task<(bool isSuccessful, Lobby createdLobby)> TryCreateLobbyAsync(string lobbyName, CreateLobbyOptions createLobbyOptions);
+        public abstract Task<Lobby> TryCreateLobbyAsync(string lobbyName, CreateLobbyOptions createLobbyOptions);
 
-        public abstract Task<(bool isSuccessful, List<Lobby> queriedLobbyList)> TryQueryLobbiesAsync(QueryLobbiesOptions queryLobbiesOptions);
+        public abstract Task<List<Lobby>> TryQueryLobbiesAsync(QueryLobbiesOptions queryLobbiesOptions);
 
-        public abstract Task<(bool isSuccessful, Lobby joinedLobby)> TryJoinLobbyByIdAsync(string lobbyId);
+        public abstract Task<Lobby> TryJoinLobbyByIdAsync(string lobbyId);
 
-        public abstract Task<(bool isSuccessful, Lobby joinedLobby)> TryJoinLobbyByCodeAsync(string lobbyCode);
+        public abstract Task<Lobby> TryJoinLobbyByCodeAsync(string lobbyCode);
 
-        public abstract Task<bool> TryDeleteLobbyAsync(string lobbyId);
+        public abstract Task TryDeleteLobbyAsync(string lobbyId);
 
-        public abstract Task<bool> TryRemovePlayerAsync(string lobbyId, string playerId);
+        public abstract Task TryRemovePlayerAsync(string lobbyId, string playerId);
 
         public abstract void TrySendHeartBeatPingAsync(string lobbyId);
-
-        protected bool IsLobbyNameValid(string lobbyName)
-        {
-            return !String.IsNullOrWhiteSpace(lobbyName);
-        }
     }
 }
 

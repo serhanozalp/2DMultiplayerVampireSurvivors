@@ -21,10 +21,17 @@ public class ConnectionCommandQuerryLobbies : IConnectionCommand
     }
     public async Task<bool> Execute()
     {
-        Debug.LogWarning("Executing Querry Lobbies");
-        var queryLobbiesRequestResult = await _lobbyServiceFacade.TryQueryLobbiesAsync(GenerateQueryLobbiesOptions(_selectedGameModeNameDictionary));
-        _queriedLobbyListMessageChannel.Publish(new QueriedLobbyListMessage { queriedLobbyList = queryLobbiesRequestResult.queriedLobbyList });
-        return queryLobbiesRequestResult.isSuccessful;
+        try
+        {
+            Debug.LogWarning("Executing Querry Lobbies");
+            var queriedLobbies = await _lobbyServiceFacade.TryQueryLobbiesAsync(GenerateQueryLobbiesOptions(_selectedGameModeNameDictionary));
+            _queriedLobbyListMessageChannel.Publish(new QueriedLobbyListMessage { queriedLobbyList = queriedLobbies });
+            return true;
+        }
+        catch (LobbyServiceException)
+        {
+            return false;
+        }
     }
 
     public async Task Undo()

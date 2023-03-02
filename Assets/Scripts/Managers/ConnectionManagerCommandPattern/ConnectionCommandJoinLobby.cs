@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Unity.Services.Lobbies.Models;
 using System;
 using Unity.Services.Authentication;
+using Unity.Services.Lobbies;
 
 public class ConnectionCommandJoinLobby : IConnectionCommand
 {
@@ -20,18 +21,33 @@ public class ConnectionCommandJoinLobby : IConnectionCommand
     }
     public async Task<bool> Execute()
     {
-        Debug.LogWarning("Executing Join Lobby");
-        var joinLobbyRequestResult = !String.IsNullOrEmpty(_lobby.LobbyCode) ? await _lobbyServiceFacade.TryJoinLobbyByCodeAsync(_lobby.LobbyCode) : await _lobbyServiceFacade.TryJoinLobbyByIdAsync(_lobby.Id);
-        if (joinLobbyRequestResult.isSuccessful) _localLobby.SetLobbyData(joinLobbyRequestResult.joinedLobby);
-        return joinLobbyRequestResult.isSuccessful;
+        try
+        {
+            Debug.LogWarning("Executing Join Lobby");
+            var joinedLobby = !String.IsNullOrEmpty(_lobby.LobbyCode) ? await _lobbyServiceFacade.TryJoinLobbyByCodeAsync(_lobby.LobbyCode) : await _lobbyServiceFacade.TryJoinLobbyByIdAsync(_lobby.Id);
+            _localLobby.SetLobbyData(joinedLobby);
+            return true;
+        }
+        catch (LobbyServiceException)
+        {
+            return false;
+        }
     }
 
     public async Task Undo()
     {
-        Debug.LogWarning("Undoing Join Lobby");
-        if (_localLobby.IsActive) 
+        try
         {
-            if (await _lobbyServiceFacade.TryRemovePlayerAsync(_localLobby.LobbyId, AuthenticationService.Instance.PlayerId)) _localLobby.Reset();
-        } 
+            Debug.LogWarning("Undoing Join Lobby");
+            if (_localLobby.IsActive)
+            {
+                await _lobbyServiceFacade.TryRemovePlayerAsync(_localLobby.LobbyId, AuthenticationService.Instance.PlayerId);
+                _localLobby.Reset();
+            }
+        }
+        catch (LobbyServiceException)
+        {
+            await Task.CompletedTask;
+        }
     }
 }

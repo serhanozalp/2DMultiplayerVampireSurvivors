@@ -1,13 +1,14 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEditor;
-using System.Collections;
 using Abstracts;
+using System.Collections;
 
 public class ApplicationManager : MonoBehaviour
 {
     private BaseConnectionManager _connectionManager;
     private LocalLobby _localLobby;
+
     private void Awake()
     {
         ServiceLocator.Instance.RegisterService(new MessageChannel<ConnectionEventMessage>());
@@ -40,15 +41,6 @@ public class ApplicationManager : MonoBehaviour
         Application.wantsToQuit -= Application_OnWantsToQuit;
     }
 
-    public void QuitApplication()
-    {
-#if UNITY_EDITOR
-        EditorApplication.ExitPlaymode();
-#else
-        Application.Quit();
-#endif
-    }
-
     private bool Application_OnWantsToQuit()
     {
         var canQuit = !_localLobby.IsActive;
@@ -61,8 +53,17 @@ public class ApplicationManager : MonoBehaviour
 
     private IEnumerator LeaveLobbyBeforeQuit()
     {
-        _connectionManager.ShutdownAsync(true);
-        yield return new WaitUntil(() => { return _localLobby.IsActive == false; });
+        _connectionManager.QuitLobby();
+        yield return new WaitUntil(() => { return !_localLobby.IsActive; });
         QuitApplication();
+    }
+
+    public void QuitApplication()
+    {
+#if UNITY_EDITOR
+        EditorApplication.ExitPlaymode();
+#else
+        Application.Quit();
+#endif
     }
 }

@@ -1,3 +1,5 @@
+using System;
+
 namespace Abstracts
 {
     public abstract class BaseNetworkConnectionStateOnline : BaseNetworkConnectionState
@@ -18,6 +20,7 @@ namespace Abstracts
 
         protected virtual void OnClientDisconnect(ulong clientNetworkId)
         {
+            if (String.IsNullOrEmpty(_networkManager.DisconnectReason)) _connectionEventMessageChannel.Publish(ConnectionEventMessage.DisconnectedNoReason);
             _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateOffline);
         }
     }

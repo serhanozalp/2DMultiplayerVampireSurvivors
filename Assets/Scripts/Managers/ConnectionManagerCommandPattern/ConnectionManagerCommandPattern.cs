@@ -7,9 +7,19 @@ public class ConnectionManagerCommandPattern : BaseConnectionManager
 {
     private readonly ConnectionCommandQueue _connectionCommandQueue = new ConnectionCommandQueue();
 
-    public override void ShutdownAsync(bool forceQuit = false)
+    public ConnectionManagerCommandPattern()
     {
-        
+        _connectionEventMessageChannel.Subscribe(connectionEventMessage => HandleConnectionEventMessage(connectionEventMessage));
+    }
+
+    public override async void QuitLobbyAndShutdownNetworkAsync()
+    {
+        _connectionCommandQueue.Reset();
+        _connectionCommandQueue.AddCommand(new ConnectionCommandAuthorizePlayer(_authenticationServiceFacade));
+        _connectionCommandQueue.AddCommand(new ConnectionCommandQuitLobby(_lobbyServiceFacade, _localLobby, _lobbyPing));
+        _connectionCommandQueue.AddCommand(new ConnectionCommandShutdownNetwork(_networkManager, _networkConnectionStateMachine));
+        if (await _connectionCommandQueue.Process()) _connectionEventMessageChannel.Publish(ConnectionEventMessage.ShutdownComplete);
+        else _connectionEventMessageChannel.Publish(ConnectionEventMessage.ShutdownFailed);
     }
 
     public override async void StartClientAsync(Lobby lobby)
@@ -34,13 +44,32 @@ public class ConnectionManagerCommandPattern : BaseConnectionManager
         else _connectionEventMessageChannel.Publish(ConnectionEventMessage.StartingHostFailed);
     }
 
-    public override void QueryLobbies(Dictionary<Type, string> selectedGameModeNameDictionary)
+    public override async void QueryLobbies(Dictionary<Type, string> selectedGameModeNameDictionary)
     {
         _connectionCommandQueue.Reset();
         _connectionCommandQueue.AddCommand(new ConnectionCommandAuthorizePlayer(_authenticationServiceFacade));
         _connectionCommandQueue.AddCommand(new ConnectionCommandQuerryLobbies(_lobbyServiceFacade, selectedGameModeNameDictionary));
-#pragma warning disable
-        _connectionCommandQueue.Process();
-#pragma warning enable
+        await _connectionCommandQueue.Process();
+    }
+
+    public override async void QuitLobby()
+    {
+        _connectionCommandQueue.Reset();
+        _connectionCommandQueue.AddCommand(new ConnectionCommandAuthorizePlayer(_authenticationServiceFacade));
+        _connectionCommandQueue.AddCommand(new ConnectionCommandQuitLobby(_lobbyServiceFacade, _localLobby, _lobbyPing));
+        await _connectionCommandQueue.Process();
+    }
+
+    private void HandleConnectionEventMessage(ConnectionEventMessage connectionEventMessage)
+    {
+        if(connectionEventMessage == ConnectionEventMessage.DisconnectedHostShutdown || connectionEventMessage == ConnectionEventMessage.DisconnectedNoReason)
+        {
+            QuitLobby();
+        }
+    }
+
+    ~ConnectionManagerCommandPattern()
+    {
+        _connectionEventMessageChannel.Unsubscribe(connectionEventMessage => HandleConnectionEventMessage(connectionEventMessage));
     }
 }

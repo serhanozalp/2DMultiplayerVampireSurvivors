@@ -25,27 +25,35 @@ public class ConnectionCommandCreateLobby : IConnectionCommand
     }
     public async Task<bool> Execute()
     {
-        Debug.LogWarning("Executing Create Lobby");
-        var createLobbyRequestResult = await _lobbyServiceFacade.TryCreateLobbyAsync(_lobbyName, GenerateCreateLobbyOptions(_localLobby.RelayCode, _selectedGameModeNameDictionary));
-        if (createLobbyRequestResult.isSuccessful)
+        try
         {
-            var createdLobby = createLobbyRequestResult.createdLobby;
+            Debug.LogWarning("Executing Create Lobby");
+            var createdLobby = await _lobbyServiceFacade.TryCreateLobbyAsync(_lobbyName, GenerateCreateLobbyOptions(_localLobby.RelayCode, _selectedGameModeNameDictionary));
             _localLobby.SetLobbyData(createdLobby);
             _lobbyPing.StartPing(createdLobby.Id);
+            return true;
         }
-        return createLobbyRequestResult.isSuccessful;
+        catch (LobbyServiceException)
+        {
+            return false;
+        }
     }
 
     public async Task Undo()
     {
-        Debug.LogWarning("Undoing Create Lobby");
-        if (_localLobby.IsActive) 
+        try
         {
-            if (await _lobbyServiceFacade.TryDeleteLobbyAsync(_localLobby.LobbyId)) 
+            Debug.LogWarning("Undoing Create Lobby");
+            if (_localLobby.IsActive)
             {
+                await _lobbyServiceFacade.TryDeleteLobbyAsync(_localLobby.LobbyId);
                 _localLobby.Reset();
                 _lobbyPing.StopPing();
-            } 
+            }
+        }
+        catch (LobbyServiceException)
+        {
+            await Task.CompletedTask;
         }
     }
 

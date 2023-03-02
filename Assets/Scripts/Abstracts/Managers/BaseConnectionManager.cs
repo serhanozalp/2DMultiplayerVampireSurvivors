@@ -1,18 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Unity.Netcode;
 using Unity.Services.Lobbies.Models;
 
 public enum ConnectionEventMessage
 {
-    StartedShutdown,
     Connected,
     ShutdownComplete,
     ShutdownFailed,
     StartingHostFailed,
     StartingClientFailed,
     DisconnectedHostShutdown,
-    DisconnectedServerFull
+    DisconnectedServerFull,
+    DisconnectedNoReason
 }
 
 namespace Abstracts
@@ -44,7 +45,9 @@ namespace Abstracts
 
         public abstract void StartHostAsync(string lobbyName, Dictionary<Type, string> selectedGameModeNameDictionary);
 
-        public abstract void ShutdownAsync(bool forceQuit = false);
+        public abstract void QuitLobbyAndShutdownNetworkAsync();
+
+        public abstract void QuitLobby();
 
         public abstract void QueryLobbies(Dictionary<Type, string> selectedGameModeNameDictionary);
     }

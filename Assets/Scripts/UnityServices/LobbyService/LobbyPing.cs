@@ -10,11 +10,11 @@ public class LobbyPing
     public LobbyPing(BaseLobbyServiceFacade lobbyServiceFacade)
     {
         _lobbyServiceFacade = lobbyServiceFacade;
+        _pingCancellationTokenSource = new CancellationTokenSource();
     }
 
     public void StartPing(string lobbyId)
     {
-        _pingCancellationTokenSource = new CancellationTokenSource();
         Task.Run(async () =>
         {
             while (true)

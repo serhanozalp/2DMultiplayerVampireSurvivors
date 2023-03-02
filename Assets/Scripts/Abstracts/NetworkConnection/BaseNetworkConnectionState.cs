@@ -18,7 +18,7 @@ namespace Abstracts
 
         public abstract void Exit();
 
-        public virtual void OnRequestShutdown() // This function can take ConnectStatus argument to specify why the user has requested shutdown
+        public virtual void OnRequestShutdown()
         {
             _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateOffline);
         }

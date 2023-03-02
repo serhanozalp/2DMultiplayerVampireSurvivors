@@ -50,7 +50,7 @@ public class NetworkConnectionStateHosting : BaseNetworkConnectionStateOnline
         if(clientNetworkId == _networkManager.LocalClientId)
         {
             _sessionManager.Reset();
-            _networkConnectionStateMachine.ChangeState(_networkConnectionStateMachine._networkConnectionStateOffline);
+            base.OnClientDisconnect(clientNetworkId);
         }
         else _sessionManager.DeleteFromDictionary(clientNetworkId);
     }

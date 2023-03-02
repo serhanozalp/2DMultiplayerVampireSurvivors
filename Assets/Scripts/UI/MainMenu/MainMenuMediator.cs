@@ -116,7 +116,8 @@ public class MainMenuMediator : MonoBehaviour
 
     public void QuitLobby()
     {
-        _connectionManager.ShutdownAsync();
+        ConfigureUiForAsyncOperations(true);
+        _connectionManager.QuitLobbyAndShutdownNetworkAsync();
     }
 
     private void HandleConnectionEventMessage(ConnectionEventMessage connectionEventMessage)
@@ -127,14 +128,15 @@ public class MainMenuMediator : MonoBehaviour
                 ConfigureUiForAsyncOperations(false);
                 ShowCanvasGroupLobbyRoom();
                 break;
-            case ConnectionEventMessage.StartedShutdown:
-                ConfigureUiForAsyncOperations(true);
-                break;
             case ConnectionEventMessage.ShutdownComplete:
                 ConfigureUiForAsyncOperations(false);
                 ShowCanvasGroupLobbyJoinCreate();
                 break;
             case ConnectionEventMessage.DisconnectedHostShutdown:
+                ConfigureUiForAsyncOperations(false);
+                ShowCanvasGroupLobbyJoinCreate();
+                break;
+            case ConnectionEventMessage.DisconnectedNoReason:
                 ConfigureUiForAsyncOperations(false);
                 ShowCanvasGroupLobbyJoinCreate();
                 break;

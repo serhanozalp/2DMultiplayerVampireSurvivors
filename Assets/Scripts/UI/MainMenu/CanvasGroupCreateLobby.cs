@@ -36,12 +36,18 @@ public class CanvasGroupCreateLobby : BaseCanvasGroup
 
     private void ButtonCreateLobbyClicked()
     {
+        var lobbyName = _inputFieldLobbyName.text;
+        if (!IsLobbyNameValid(lobbyName))
+        {
+            PopupManager.Instance.AddPopup("Lobby Name Error", "Lobby Name Invalid!");
+            return;
+        }
         Dictionary<Type, string> selectedGameModeNameDictionary = new Dictionary<Type, string>();
         foreach(var dropDown in _dropDownList)
         {
             selectedGameModeNameDictionary.Add(Type.GetType(dropDown.name), dropDown.options[dropDown.value].text);
         }
-        _mainMenuMediator.CreateLobby(_inputFieldLobbyName.text, selectedGameModeNameDictionary);
+        _mainMenuMediator.CreateLobby(lobbyName, selectedGameModeNameDictionary);
     }
 
     private void SetupGameModeDropDowns()
@@ -65,5 +71,10 @@ public class CanvasGroupCreateLobby : BaseCanvasGroup
     {
         _myCanvasGroup.alpha = 1f;
         _myCanvasGroup.blocksRaycasts = true;
+    }
+
+    private bool IsLobbyNameValid(string lobbyName)
+    {
+        return !String.IsNullOrWhiteSpace(lobbyName);
     }
 }
